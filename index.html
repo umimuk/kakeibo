@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家計管理簿アプリ - UI Mockup</title>
+    <style>
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #2d3748;
+            background-color: #ffffff;
+        }
+
+        /* Container & Layout */
+        .container {
+            max-width: 375px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        .header {
+            background-color: #ffffff;
+            padding: 16px 16px 8px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a202c;
+            text-align: center;
+        }
+
+        /* Page Content */
+        .page {
+            display: none;
+            padding: 16px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Progress Bar Components */
+        .progress-section {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-label {
+            font-size: 14px;
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        .progress-amount {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background-color: #e2e8f0;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3182ce, #2b77b8);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .progress-remaining {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Cards & Components */
+        .card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 12px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #ffffff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #ffffff;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-height: 44px;
+        }
+
+        .btn-primary {
+            background-color: #3182ce;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: #2b77b8;
+        }
+
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* OCR Button */
+        .btn-ocr {
+            background-color: #10b981;
+            color: #ffffff;
+            margin-top: 8px;
+        }
+
+        .btn-ocr:hover {
+            background-color: #0d9768;
+        }
+
+        /* Lists */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a202c;
+        }
+
+        .list-amount {
+            font-size: 14px;
+            font-weight: 600;
+            color: #3182ce;
+        }
+
+        /* Mascot */
+        .mascot-container {
+            position: fixed;
+            bottom: 100px;
+            right: 16px;
+            z-index: 10;
+        }
+
+        .mascot {
+            width: 80px;
+            height: 80px;
+            background-color: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #92400e;
+            text-align: center;
+        }
+
+        /* Theme Color Options */
+        .theme-colors {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .theme-option {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .theme-option.active {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+        }
+
+        .theme-white { background-color: #ffffff; border: 2px solid #e2e8f0; }
+        .theme-blue { background: linear-gradient(135deg, #3182ce, #2c5aa0); }
+        .theme-green { background: linear-gradient(135deg, #10b981, #0d9768); }
+        .theme-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .theme-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+
+        /* Summary Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 375px;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            padding: 8px 0 16px 0;
+            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            min-width: 44px;
+            min-height: 44px;
+            justify-content: center;
+        }
+
+        .nav-item.active {
+            color: #3182ce;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+                margin: 0 auto;
+            }
+
+            .page {
+                padding: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>家計管理簿</h1>
+        </header>
+
+        <!-- Page 1: Dashboard -->
+        <div class="page active" id="dashboard">
+            <!-- 収支バー -->
+            <div class="progress-section">
+                <div class="progress-label">合計収入</div>
+                <div class="progress-amount">¥250,000</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 67%;">
+                        <div class="progress-remaining">残額 ¥82,000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- クレジット残額バー -->
+            <div class="progress-section">
+                <div class="progress-label">クレジット利用状況</div>
+                <div class="progress-amount">¥120,000 / ¥150,000</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 80%; background: linear-gradient(90deg, #f56565, #e53e3e);">
+                        <div class="progress-remaining">残枠 ¥30,000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 当月サマリー -->
+            <div class="card">
+                <h2 class="card-title">4月のサマリー</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">¥168,000</div>
+                        <div class="stat-label">支出</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥82,000</div>
+                        <div class="stat-label">残額</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥45,000</div>
+                        <div class="stat-label">食費</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥23,000</div>
+                        <div class="stat-label">娯楽</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: Expense Input -->
+        <div class="page" id="expense">
+            <div class="card">
+                <h2 class="card-title">支出を記録</h2>
+                <form>
+                    <div class="form-group">
+                        <label class="form-label">金額（必須）</label>
+                        <input type="number" class="form-input" placeholder="¥1,500" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">カテゴリ</label>
+                        <select class="form-select">
+                            <option>食費</option>
+                            <option>交通費</option>
+                            <option>娯楽</option>
+                            <option>生活用品</option>
+                            <option>その他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">購入場所</label>
+                        <input type="text" class="form-input" placeholder="コンビニA">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">支払い方法</label>
+                        <select class="form-select">
+                            <option>現金</option>
+                            <option>クレジットカード</option>
+                            <option>電子マネー</option>
+                            <option>QR決済</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">記録する</button>
+                </form>
+                <button class="btn btn-ocr btn-full">📷 レシートを撮影して入力</button>
+            </div>
+        </div>
+
+        <!-- Page 3: Fixed Income/Expense -->
+        <div class="page" id="fixed">
+            <div class="card">
+                <h2 class="card-title">固定収入</h2>
+                <div class="list-item">
+                    <span class="list-title">給料</span>
+                    <span class="list-amount">¥220,000</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-title">副業</span>
+                    <span class="list-amount">¥30,000</span>
+                </div>
+                <button class="btn btn-secondary btn-full">+ 固定収入を追加</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">固定支出</h2>
+                <div class="list-item">
+                    <span class="list-title">家賃</span>
+                    <span class="list-amount">¥80,000</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-title">光熱費</span>
+                    <span class="list-amount">¥12,000</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-title">スマホ代</span>
+                    <span class="list-amount">¥8,000</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-title">サブスク</span>
+                    <span class="list-amount">¥3,500</span>
+                </div>
+                <button class="btn btn-secondary btn-full">+ 固定支出を追加</button>
+            </div>
+        </div>
+
+        <!-- Page 4: Debt Management -->
+        <div class="page" id="debt">
+            <div class="card">
+                <h2 class="card-title">借入先一覧</h2>
+                <div class="list-item">
+                    <div>
+                        <div class="list-title">カードローンA</div>
+                        <div style="font-size: 12px; color: #6b7280;">残高: ¥300,000 | 月返済: ¥15,000</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div>
+                        <div class="list-title">カードローンB</div>
+                        <div style="font-size: 12px; color: #6b7280;">残高: ¥150,000 | 月返済: ¥10,000</div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-full">+ 借入先を追加</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">返済予定</h2>
+                <div class="progress-section">
+                    <div class="progress-label">カードローンA（あと18ヶ月）</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 40%;">
+                        </div>
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-label">カードローンB（あと15ヶ月）</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 5: Revolving Calculator -->
+        <div class="page" id="revolving">
+            <div class="card">
+                <h2 class="card-title">リボ払いシミュレーション</h2>
+                <form>
+                    <div class="form-group">
+                        <label class="form-label">リボ残高</label>
+                        <input type="number" class="form-input" placeholder="¥50,000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">月々支払額</label>
+                        <input type="number" class="form-input" placeholder="¥10,000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">年利（%）</label>
+                        <input type="number" step="0.1" class="form-input" placeholder="15.0">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-full">計算する</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">計算結果</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">6</div>
+                        <div class="stat-label">完済月数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥58,500</div>
+                        <div class="stat-label">支払総額</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">¥8,500</div>
+                        <div class="stat-label">利息総額</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">17%</div>
+                        <div class="stat-label">利息割合</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 6: Credit Management -->
+        <div class="page" id="credit">
+            <div class="card">
+                <h2 class="card-title">クレジットカード一覧</h2>
+                <div class="list-item">
+                    <div>
+                        <div class="list-title">楽天カード</div>
+                        <div style="font-size: 12px; color: #6b7280;">限度額: ¥100,000</div>
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-amount">利用済み: ¥75,000</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%; background: linear-gradient(90deg, #f56565, #e53e3e);">
+                            <div class="progress-remaining">残枠 ¥25,000</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list-item" style="margin-top: 16px;">
+                    <div>
+                        <div class="list-title">三井住友カード</div>
+                        <div style="font-size: 12px; color: #6b7280;">限度額: ¥50,000</div>
+                    </div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-amount">利用済み: ¥45,000</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%; background: linear-gradient(90deg, #f56565, #e53e3e);">
+                            <div class="progress-remaining">残枠 ¥5,000</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary btn-full" style="margin-top: 16px;">+ カードを追加</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">今月の利用履歴</h2>
+                <div class="list-item">
+                    <span class="list-title">ネットショッピング</span>
+                    <span class="list-amount">¥15,000</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-title">コンビニ</span>
+                    <span class="list-amount">¥3,200</span>
+                </div>
+                <div class="list-item">
+                    <span class="list-title">レストラン</span>
+                    <span class="list-amount">¥8,500</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 7: Settings -->
+        <div class="page" id="settings">
+            <div class="card">
+                <h2 class="card-title">テーマカラー</h2>
+                <div class="theme-colors">
+                    <div class="theme-option theme-white active" data-theme="white"></div>
+                    <div class="theme-option theme-blue" data-theme="blue"></div>
+                    <div class="theme-option theme-green" data-theme="green"></div>
+                    <div class="theme-option theme-purple" data-theme="purple"></div>
+                    <div class="theme-option theme-pink" data-theme="pink"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">アカウント設定</h2>
+                <div class="form-group">
+                    <label class="form-label">表示名</label>
+                    <input type="text" class="form-input" value="ユーザー1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">メール</label>
+                    <input type="email" class="form-input" value="user@example.com">
+                </div>
+                <button class="btn btn-primary btn-full">設定を保存</button>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">データ管理</h2>
+                <button class="btn btn-secondary btn-full" style="margin-bottom: 8px;">データをエクスポート</button>
+                <button class="btn btn-secondary btn-full">データを初期化</button>
+            </div>
+        </div>
+
+        <!-- Mascot -->
+        <div class="mascot-container">
+            <div class="mascot">
+                マスコット
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-container">
+                <div class="nav-item active" onclick="showPage('dashboard')">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">ホーム</div>
+                </div>
+                <div class="nav-item" onclick="showPage('expense')">
+                    <div class="nav-icon">💰</div>
+                    <div class="nav-label">記録</div>
+                </div>
+                <div class="nav-item" onclick="showPage('fixed')">
+                    <div class="nav-icon">⚙️</div>
+                    <div class="nav-label">固定</div>
+                </div>
+                <div class="nav-item" onclick="showPage('debt')">
+                    <div class="nav-icon">📊</div>
+                    <div class="nav-label">返済</div>
+                </div>
+                <div class="nav-item" onclick="showPage('revolving')">
+                    <div class="nav-icon">📈</div>
+                    <div class="nav-label">リボ</div>
+                </div>
+                <div class="nav-item" onclick="showPage('credit')">
+                    <div class="nav-icon">💳</div>
+                    <div class="nav-label">カード</div>
+                </div>
+                <div class="nav-item" onclick="showPage('settings')">
+                    <div class="nav-icon">⚙️</div>
+                    <div class="nav-label">設定</div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show target page
+            document.getElementById(pageId).classList.add('active');
+
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+        }
+
+        // Theme Selection
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+
+                // ここで実際のテーマ適用ロジックを追加可能
+                console.log('Theme changed to:', this.dataset.theme);
+            });
+        });
+
+        // Form Submission (Mock)
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('データが保存されました（モック動作）');
+            });
+        });
+
+        // OCR Button (Mock)
+        document.querySelector('.btn-ocr').addEventListener('click', function() {
+            alert('カメラが起動します（モック動作）');
+        });
+
+        // Calculator Button (Mock)
+        document.querySelector('#revolving button[type="button"]').addEventListener('click', function() {
+            alert('計算結果が更新されました（モック動作）');
+        });
+    </script>
+</body>
+</html>
