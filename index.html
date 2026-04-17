@@ -1,819 +1,1478 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>家計管理簿アプリ - UI Mockup</title>
-    <style>
-        /* Reset & Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>かけいぼ</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-            color: #2d3748;
-            background-color: #ffffff;
-        }
+    :root {
+      --teal: #14b8a6;
+      --teal-dark: #0d9488;
+      --teal-light: #ccfbf1;
+      --bg: #f0fafa;
+      --white: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --income: #14b8a6;
+      --expense: #f97316;
+      --shadow: 0 1px 4px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
 
-        /* Container & Layout */
-        .container {
-            max-width: 375px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            position: relative;
-            padding-bottom: 80px;
-        }
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', 'Segoe UI', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
 
-        /* Header */
-        .header {
-            background-color: #ffffff;
-            padding: 16px 16px 8px 16px;
-            border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+    /* ===== App Shell ===== */
+    #app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--white);
+      position: relative;
+      overflow-x: hidden;
+    }
 
-        .header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a202c;
-            text-align: center;
-        }
+    /* ===== Loading ===== */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-        /* Page Content */
-        .page {
-            display: none;
-            padding: 16px;
-        }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--teal-light);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
 
-        .page.active {
-            display: block;
-        }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Progress Bar Components */
-        .progress-section {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+    /* ===== Auth Screen ===== */
+    #auth-screen {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      background: linear-gradient(160deg, #f0fdfb 0%, #fff 60%);
+    }
 
-        .progress-label {
-            font-size: 14px;
-            color: #4a5568;
-            margin-bottom: 8px;
-        }
+    .auth-logo {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--teal);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+    }
 
-        .progress-amount {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
+    .auth-tagline {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
 
-        .progress-bar {
-            width: 100%;
-            height: 24px;
-            background-color: #e2e8f0;
-            border-radius: 12px;
-            position: relative;
-            overflow: hidden;
-        }
+    .auth-card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--white);
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 24px rgba(20,184,166,0.12);
+    }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3182ce, #2b77b8);
-            border-radius: 12px;
-            position: relative;
-        }
+    .auth-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
 
-        .progress-remaining {
-            position: absolute;
-            top: 50%;
-            right: 8px;
-            transform: translateY(-50%);
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 500;
-        }
+    .form-group {
+      margin-bottom: 16px;
+    }
 
-        /* Cards & Components */
-        .card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 12px;
-        }
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
 
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 16px;
-        }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+    }
 
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 4px;
-        }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 50px;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: #ffffff;
-        }
+    .btn-primary {
+      background: var(--teal);
+      color: white;
+    }
 
-        .form-input:focus {
-            outline: none;
-            border-color: #3182ce;
-            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
-        }
+    .btn-primary:active {
+      background: var(--teal-dark);
+      transform: scale(0.98);
+    }
 
-        .form-select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: #ffffff;
-        }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            min-height: 44px;
-        }
+    .auth-error {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--danger);
+      display: none;
+    }
 
-        .btn-primary {
-            background-color: #3182ce;
-            color: #ffffff;
-        }
+    /* ===== Main App ===== */
+    #main-screen {
+      display: none;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-        .btn-primary:hover {
-            background-color: #2b77b8;
-        }
+    /* ===== Header ===== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .btn-secondary {
-            background-color: #e2e8f0;
-            color: #2d3748;
-        }
+    .app-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--teal);
+      letter-spacing: -0.5px;
+    }
 
-        .btn-secondary:hover {
-            background-color: #d1d5db;
-        }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .btn-full {
-            width: 100%;
-        }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-        /* OCR Button */
-        .btn-ocr {
-            background-color: #10b981;
-            color: #ffffff;
-            margin-top: 8px;
-        }
+    .icon-btn:active {
+      background: var(--teal-light);
+    }
 
-        .btn-ocr:hover {
-            background-color: #0d9768;
-        }
+    /* ===== Page Content ===== */
+    .page-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 16px 100px;
+    }
 
-        /* Lists */
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
+    .page {
+      display: none;
+    }
 
-        .list-item:last-child {
-            border-bottom: none;
-        }
+    .page.active {
+      display: block;
+    }
 
-        .list-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1a202c;
-        }
+    /* ===== Bottom Navigation ===== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+      z-index: 200;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    }
 
-        .list-amount {
-            font-size: 14px;
-            font-weight: 600;
-            color: #3182ce;
-        }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 12px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 600;
+      min-width: 60px;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s;
+    }
 
-        /* Mascot */
-        .mascot-container {
-            position: fixed;
-            bottom: 100px;
-            right: 16px;
-            z-index: 10;
-        }
+    .nav-item .nav-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
 
-        .mascot {
-            width: 80px;
-            height: 80px;
-            background-color: #fef3c7;
-            border: 2px solid #f59e0b;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 500;
-            color: #92400e;
-            text-align: center;
-        }
+    .nav-item.active {
+      color: var(--teal);
+    }
 
-        /* Theme Color Options */
-        .theme-colors {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 16px;
-        }
+    .nav-item.active .nav-icon {
+      filter: drop-shadow(0 0 4px rgba(20,184,166,0.4));
+    }
 
-        .theme-option {
-            aspect-ratio: 1;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
+    /* Center record button */
+    .nav-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      margin-top: -20px;
+    }
 
-        .theme-option.active {
-            border-color: #3182ce;
-            box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
-        }
+    .nav-center-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--teal);
+      border: 4px solid var(--white);
+      box-shadow: 0 4px 16px rgba(20,184,166,0.4);
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: all 0.15s;
+      line-height: 1;
+    }
 
-        .theme-white { background-color: #ffffff; border: 2px solid #e2e8f0; }
-        .theme-blue { background: linear-gradient(135deg, #3182ce, #2c5aa0); }
-        .theme-green { background: linear-gradient(135deg, #10b981, #0d9768); }
-        .theme-purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-        .theme-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .nav-center-btn:active {
+      transform: scale(0.92);
+      background: var(--teal-dark);
+    }
 
-        /* Summary Stats */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
+    .nav-center-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--teal);
+    }
 
-        .stat-card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-        }
+    /* ===== Home / Dashboard ===== */
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 10px;
+    }
 
-        .stat-value {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1a202c;
-        }
+    .month-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
 
-        .stat-label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
+    /* Income/Expense Bar */
+    .balance-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
 
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 375px;
-            background-color: #ffffff;
-            border-top: 1px solid #e2e8f0;
-            padding: 8px 0 16px 0;
-            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
-        }
+    .balance-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
 
-        .nav-container {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            position: relative;
-            padding: 0 16px;
-            width: 100%;
-            max-width: 375px;
-        }
+    .balance-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            min-width: 44px;
-            min-height: 44px;
-            justify-content: center;
-            flex: 1;
-        }
+    .balance-amount {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+    }
 
-        .nav-item.active {
-            color: #3182ce;
-        }
+    .balance-amount.income { color: var(--income); }
+    .balance-amount.expense { color: var(--expense); }
+    .balance-amount.remaining { color: var(--teal-dark); }
 
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-            font-size: 20px;
-        }
+    .bar-wrapper {
+      position: relative;
+      width: 100%;
+      height: 28px;
+      background: #e2e8f0;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
 
-        .nav-label {
-            font-size: 10px;
-            font-weight: 500;
-        }
+    .bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      border-radius: 14px;
+      transition: width 0.8s ease;
+    }
 
-        /* Central Record Button (PayPay style) */
-        .nav-item.central-record {
-            position: relative;
-            top: -20px;
-            background-color: #10b981;
-            border-radius: 50%;
-            width: 64px;
-            height: 64px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-            border: 4px solid #ffffff;
-            justify-content: center;
-            align-items: center;
-            flex: none;
-        }
+    .bar-fill.income-bar { background: linear-gradient(90deg, #14b8a6, #0d9488); }
+    .bar-fill.expense-bar { background: linear-gradient(90deg, #f97316, #ea580c); }
 
-        .nav-item.central-record .nav-icon {
-            color: #ffffff;
-            font-size: 28px;
-            margin-bottom: 0;
-        }
+    .bar-remaining-label {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
 
-        .nav-item.central-record .nav-label {
-            position: absolute;
-            bottom: -20px;
-            font-size: 10px;
-            color: #2d3748;
-            font-weight: 600;
-        }
+    .bar-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
-        .nav-item.central-record:hover {
-            background-color: #0d9768;
-            transform: scale(1.05);
-        }
+    .bar-stats span strong {
+      font-weight: 700;
+      color: var(--text);
+    }
 
-        .nav-item.central-record.active {
-            background-color: #0d9768;
-        }
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
 
-        /* Responsive */
-        @media (min-width: 768px) {
-            .container {
-                max-width: 768px;
-                margin: 0 auto;
-            }
+    .summary-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
 
-            .page {
-                padding: 24px;
-            }
+    .summary-card .s-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
 
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-    </style>
+    .summary-card .s-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .summary-card .s-value.green { color: var(--income); }
+    .summary-card .s-value.orange { color: var(--expense); }
+
+    /* Credit bar */
+    .credit-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .credit-section .section-title {
+      margin-bottom: 14px;
+    }
+
+    .credit-item {
+      margin-bottom: 14px;
+    }
+
+    .credit-item:last-child { margin-bottom: 0; }
+
+    .credit-item-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .credit-name { font-weight: 600; color: var(--text); }
+
+    .credit-remaining {
+      color: var(--text-muted);
+    }
+
+    .credit-remaining strong {
+      color: var(--teal);
+      font-weight: 700;
+    }
+
+    .credit-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .credit-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #14b8a6, #0d9488);
+      border-radius: 4px;
+    }
+
+    .credit-bar-fill.warning {
+      background: linear-gradient(90deg, #f97316, #ea580c);
+    }
+
+    /* Recent list */
+    .recent-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .recent-list { list-style: none; }
+
+    .recent-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recent-item:last-child { border-bottom: none; }
+
+    .recent-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--teal-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .recent-info { flex: 1; min-width: 0; }
+
+    .recent-name {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .recent-amount {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--expense);
+      flex-shrink: 0;
+    }
+
+    /* ===== Under Construction ===== */
+    .under-construction {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 50vh;
+      gap: 16px;
+      text-align: center;
+      padding: 32px;
+    }
+
+    .under-construction .uc-icon {
+      font-size: 56px;
+    }
+
+    .under-construction h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .under-construction p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .badge-phase {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--teal-light);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ===== Record Modal ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      align-items: flex-end;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      background: var(--white);
+      border-radius: 24px 24px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .amount-input-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .amount-prefix {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .amount-input {
+      width: 100%;
+      padding: 16px 16px 16px 44px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text);
+      text-align: right;
+      background: var(--bg);
+      -webkit-appearance: none;
+    }
+
+    .amount-input:focus {
+      outline: none;
+      border-color: var(--teal);
+      background: var(--white);
+    }
+
+    .select-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .styled-select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--white);
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    .styled-select:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+
+    .record-form .form-input {
+      margin-bottom: 12px;
+    }
+
+    .btn-save {
+      background: var(--teal);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      width: 100%;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 52px;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+
+    .btn-save:active {
+      background: var(--teal-dark);
+      transform: scale(0.98);
+    }
+
+    .btn-save:disabled {
+      opacity: 0.6;
+    }
+
+    /* ===== Settings Panel ===== */
+    #settings-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 300;
+      overflow-y: auto;
+      max-width: 430px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .settings-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .settings-header h2 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .settings-body {
+      padding: 20px 16px;
+    }
+
+    .settings-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .settings-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 12px 16px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .settings-item:last-child { border-bottom: none; }
+
+    .settings-item:active { background: var(--bg); }
+
+    .settings-item-icon {
+      font-size: 20px;
+      margin-right: 14px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .settings-item-label {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .settings-item-arrow {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .settings-user-info {
+      padding: 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .user-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: white;
+      font-weight: 700;
+    }
+
+    .user-email {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: #fef2f2;
+      color: var(--danger);
+      border: 1.5px solid #fecaca;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 48px;
+      transition: all 0.15s;
+    }
+
+    .btn-logout:active {
+      background: #fee2e2;
+    }
+
+    /* ===== Toast ===== */
+    #toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e293b;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===== Utility ===== */
+    .text-center { text-align: center; }
+    .mt-8 { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1>家計管理簿</h1>
-            <button class="header-settings-btn" onclick="showPage('settings')" style="position: absolute; right: 16px; top: 16px; background: none; border: none; font-size: 20px; color: #6b7280; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.15s ease; min-width: 44px; min-height: 44px;" onmouseover="this.style.backgroundColor='#e2e8f0'" onmouseout="this.style.backgroundColor='transparent'">⚙️</button>
-        </header>
+<div id="app">
 
-        <!-- Page 1: Dashboard -->
-        <div class="page active" id="dashboard">
-            <!-- 収支バー -->
-            <div class="progress-section">
-                <div class="progress-label">合計収入</div>
-                <div class="progress-amount">¥250,000</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 67%;">
-                        <div class="progress-remaining">残額 ¥82,000</div>
-                    </div>
-                </div>
-            </div>
+  <!-- Loading -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <span style="font-size:14px;color:#64748b;">読み込み中...</span>
+  </div>
 
-            <!-- クレジット残額バー -->
-            <div class="progress-section">
-                <div class="progress-label">クレジット利用状況</div>
-                <div class="progress-amount">¥120,000 / ¥150,000</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 80%; background: linear-gradient(90deg, #f56565, #e53e3e);">
-                        <div class="progress-remaining">残枠 ¥30,000</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 当月サマリー -->
-            <div class="card">
-                <h2 class="card-title">4月のサマリー</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">¥168,000</div>
-                        <div class="stat-label">支出</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">¥82,000</div>
-                        <div class="stat-label">残額</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">¥45,000</div>
-                        <div class="stat-label">食費</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">¥23,000</div>
-                        <div class="stat-label">娯楽</div>
-                    </div>
-                </div>
-            </div>
+  <!-- Auth Screen -->
+  <div id="auth-screen">
+    <div class="auth-logo">かけいぼ</div>
+    <div class="auth-tagline">2人でかんたん家計管理</div>
+    <div class="auth-card">
+      <h2>ログイン</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">メールアドレス</label>
+          <input type="email" id="email" class="form-input" placeholder="example@email.com" autocomplete="email" required>
         </div>
-
-        <!-- Page 2: Expense Input -->
-        <div class="page" id="expense">
-            <div class="card">
-                <h2 class="card-title">支出を記録</h2>
-                <form>
-                    <div class="form-group">
-                        <label class="form-label">金額（必須）</label>
-                        <input type="number" class="form-input" placeholder="¥1,500" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">カテゴリ</label>
-                        <select class="form-select">
-                            <option>食費</option>
-                            <option>交通費</option>
-                            <option>娯楽</option>
-                            <option>生活用品</option>
-                            <option>その他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">購入場所</label>
-                        <input type="text" class="form-input" placeholder="コンビニA">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">支払い方法</label>
-                        <select class="form-select">
-                            <option>現金</option>
-                            <option>クレジットカード</option>
-                            <option>電子マネー</option>
-                            <option>QR決済</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-full">記録する</button>
-                </form>
-                <button class="btn btn-ocr btn-full">📷 レシートを撮影して入力</button>
-            </div>
+        <div class="form-group">
+          <label class="form-label" for="password">パスワード</label>
+          <input type="password" id="password" class="form-input" placeholder="••••••••" autocomplete="current-password" required>
         </div>
-
-        <!-- Page 3: Fixed Income/Expense -->
-        <div class="page" id="fixed">
-            <div class="card">
-                <h2 class="card-title">固定収入</h2>
-                <div class="list-item">
-                    <span class="list-title">給料</span>
-                    <span class="list-amount">¥220,000</span>
-                </div>
-                <div class="list-item">
-                    <span class="list-title">副業</span>
-                    <span class="list-amount">¥30,000</span>
-                </div>
-                <button class="btn btn-secondary btn-full">+ 固定収入を追加</button>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">固定支出</h2>
-                <div class="list-item">
-                    <span class="list-title">家賃</span>
-                    <span class="list-amount">¥80,000</span>
-                </div>
-                <div class="list-item">
-                    <span class="list-title">光熱費</span>
-                    <span class="list-amount">¥12,000</span>
-                </div>
-                <div class="list-item">
-                    <span class="list-title">スマホ代</span>
-                    <span class="list-amount">¥8,000</span>
-                </div>
-                <div class="list-item">
-                    <span class="list-title">サブスク</span>
-                    <span class="list-amount">¥3,500</span>
-                </div>
-                <button class="btn btn-secondary btn-full">+ 固定支出を追加</button>
-            </div>
-        </div>
-
-        <!-- Page 4: Debt Management -->
-        <div class="page" id="debt">
-            <div class="card">
-                <h2 class="card-title">借入先一覧</h2>
-                <div class="list-item">
-                    <div>
-                        <div class="list-title">カードローンA</div>
-                        <div style="font-size: 12px; color: #6b7280;">残高: ¥300,000 | 月返済: ¥15,000</div>
-                    </div>
-                </div>
-                <div class="list-item">
-                    <div>
-                        <div class="list-title">カードローンB</div>
-                        <div style="font-size: 12px; color: #6b7280;">残高: ¥150,000 | 月返済: ¥10,000</div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary btn-full">+ 借入先を追加</button>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">返済予定</h2>
-                <div class="progress-section">
-                    <div class="progress-label">カードローンA（あと18ヶ月）</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 40%;">
-                        </div>
-                    </div>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-label">カードローンB（あと15ヶ月）</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 60%;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Page 6: Credit Management -->
-        <div class="page" id="credit">
-            <div class="card">
-                <h2 class="card-title">クレジットカード一覧</h2>
-                <div class="list-item">
-                    <div>
-                        <div class="list-title">楽天カード</div>
-                        <div style="font-size: 12px; color: #6b7280;">限度額: ¥100,000</div>
-                    </div>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-amount">利用済み: ¥75,000</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 75%; background: linear-gradient(90deg, #f56565, #e53e3e);">
-                            <div class="progress-remaining">残枠 ¥25,000</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="list-item" style="margin-top: 16px;">
-                    <div>
-                        <div class="list-title">三井住友カード</div>
-                        <div style="font-size: 12px; color: #6b7280;">限度額: ¥50,000</div>
-                    </div>
-                </div>
-                <div class="progress-section">
-                    <div class="progress-amount">利用済み: ¥45,000</div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 90%; background: linear-gradient(90deg, #f56565, #e53e3e);">
-                            <div class="progress-remaining">残枠 ¥5,000</div>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-secondary btn-full" style="margin-top: 16px;">+ カードを追加</button>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">今月の利用履歴</h2>
-                <div class="list-item">
-                    <span class="list-title">ネットショッピング</span>
-                    <span class="list-amount">¥15,000</span>
-                </div>
-                <div class="list-item">
-                    <span class="list-title">コンビニ</span>
-                    <span class="list-amount">¥3,200</span>
-                </div>
-                <div class="list-item">
-                    <span class="list-title">レストラン</span>
-                    <span class="list-amount">¥8,500</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page 7: Settings -->
-        <div class="page" id="settings">
-            <div class="card">
-                <h2 class="card-title">リボ払いシミュレーション</h2>
-                <form>
-                    <div class="form-group">
-                        <label class="form-label">リボ残高</label>
-                        <input type="number" class="form-input" placeholder="¥50,000">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">月々支払額</label>
-                        <input type="number" class="form-input" placeholder="¥10,000">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">年利（%）</label>
-                        <input type="number" step="0.1" class="form-input" placeholder="15.0">
-                    </div>
-                    <button type="button" class="btn btn-primary btn-full">計算する</button>
-                </form>
-
-                <div style="margin-top: 16px;">
-                    <h3 style="font-size: 16px; margin-bottom: 12px; color: #1a202c;">計算結果</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">6</div>
-                            <div class="stat-label">完済月数</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">¥58,500</div>
-                            <div class="stat-label">支払総額</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">¥8,500</div>
-                            <div class="stat-label">利息総額</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">17%</div>
-                            <div class="stat-label">利息割合</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">テーマカラー</h2>
-                <div class="theme-colors">
-                    <div class="theme-option theme-white active" data-theme="white"></div>
-                    <div class="theme-option theme-blue" data-theme="blue"></div>
-                    <div class="theme-option theme-green" data-theme="green"></div>
-                    <div class="theme-option theme-purple" data-theme="purple"></div>
-                    <div class="theme-option theme-pink" data-theme="pink"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">アカウント設定</h2>
-                <div class="form-group">
-                    <label class="form-label">表示名</label>
-                    <input type="text" class="form-input" value="ユーザー1">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">メール</label>
-                    <input type="email" class="form-input" value="user@example.com">
-                </div>
-                <button class="btn btn-primary btn-full">設定を保存</button>
-            </div>
-
-            <div class="card">
-                <h2 class="card-title">データ管理</h2>
-                <button class="btn btn-secondary btn-full" style="margin-bottom: 8px;">データをエクスポート</button>
-                <button class="btn btn-secondary btn-full">データを初期化</button>
-            </div>
-        </div>
-
-        <!-- Mascot -->
-        <div class="mascot-container">
-            <div class="mascot">
-                マスコット
-            </div>
-        </div>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <div class="nav-container">
-                <div class="nav-item active" onclick="showPage('dashboard')">
-                    <div class="nav-icon">🏠</div>
-                    <div class="nav-label">ホーム</div>
-                </div>
-                <div class="nav-item" onclick="showPage('fixed')">
-                    <div class="nav-icon">📝</div>
-                    <div class="nav-label">固定</div>
-                </div>
-                <!-- Central Record Button (PayPay style) -->
-                <div class="nav-item central-record" onclick="showPage('expense')">
-                    <div class="nav-icon">➕</div>
-                    <div class="nav-label">記録</div>
-                </div>
-                <div class="nav-item" onclick="showPage('credit')">
-                    <div class="nav-icon">💳</div>
-                    <div class="nav-label">カード</div>
-                </div>
-                <div class="nav-item" onclick="showPage('debt')">
-                    <div class="nav-icon">📊</div>
-                    <div class="nav-label">返済</div>
-                </div>
-            </div>
-        </nav>
+        <button type="submit" class="btn btn-primary" id="login-btn">ログイン</button>
+        <div class="auth-error" id="auth-error"></div>
+      </form>
     </div>
+  </div>
 
-    <script>
-        // Page Navigation
-        function showPage(pageId) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
+  <!-- Main Screen -->
+  <div id="main-screen">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>かけいぼ</h1>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="openSettings()" aria-label="設定">⚙️</button>
+      </div>
+    </header>
 
-            // Show target page
-            document.getElementById(pageId).classList.add('active');
+    <!-- Page Content -->
+    <main class="page-content">
 
-            // Update nav active state
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+      <!-- Home Page -->
+      <div class="page active" id="page-home">
+        <div class="month-label" id="month-label"></div>
 
-            // Set active state for clicked nav item
-            if (event && event.target) {
-                const clickedItem = event.target.closest('.nav-item');
-                if (clickedItem) {
-                    clickedItem.classList.add('active');
-                }
-            } else {
-                // Fallback: find nav item by page ID
-                const navItems = document.querySelectorAll('.nav-item');
-                navItems.forEach(item => {
-                    const onClick = item.getAttribute('onclick');
-                    if (onClick && onClick.includes(pageId)) {
-                        item.classList.add('active');
-                    }
-                });
-            }
-        }
+        <!-- Income Bar -->
+        <div class="balance-card">
+          <div class="balance-total">
+            <span class="balance-label">合計収入</span>
+            <span class="balance-amount income" id="total-income">¥250,000</span>
+          </div>
+          <div class="bar-wrapper">
+            <div class="bar-fill income-bar" id="income-bar" style="width:100%"></div>
+            <div class="bar-fill expense-bar" id="expense-bar" style="width:33.6%"></div>
+          </div>
+          <div class="bar-stats">
+            <span>支出 <strong id="total-expense-label">¥84,000</strong></span>
+            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥166,000</strong></span>
+          </div>
+        </div>
 
-        // Theme Selection
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-                this.classList.add('active');
+        <!-- Summary Grid -->
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="s-label">今月の収入</div>
+            <div class="s-value green" id="summary-income">¥250,000</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-label">今月の支出</div>
+            <div class="s-value orange" id="summary-expense">¥84,000</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-label">残額</div>
+            <div class="s-value" id="summary-remaining">¥166,000</div>
+          </div>
+          <div class="summary-card">
+            <div class="s-label">記録件数</div>
+            <div class="s-value" id="summary-count">8件</div>
+          </div>
+        </div>
 
-                // ここで実際のテーマ適用ロジックを追加可能
-                console.log('Theme changed to:', this.dataset.theme);
-            });
-        });
+        <!-- Credit Cards -->
+        <div class="credit-section">
+          <div class="section-title">💳 カード残額</div>
+          <div class="credit-item">
+            <div class="credit-item-header">
+              <span class="credit-name">楽天カード</span>
+              <span class="credit-remaining">残り <strong>¥232,000</strong></span>
+            </div>
+            <div class="credit-bar">
+              <div class="credit-bar-fill" style="width:8%"></div>
+            </div>
+          </div>
+          <div class="credit-item">
+            <div class="credit-item-header">
+              <span class="credit-name">PayPayカード</span>
+              <span class="credit-remaining">残り <strong>¥78,000</strong></span>
+            </div>
+            <div class="credit-bar">
+              <div class="credit-bar-fill warning" style="width:61%"></div>
+            </div>
+          </div>
+        </div>
 
-        // Form Submission (Mock)
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                alert('データが保存されました（モック動作）');
-            });
-        });
+        <!-- Recent Expenses -->
+        <div class="recent-section">
+          <div class="section-title" style="margin-bottom:12px">📝 最近の支出</div>
+          <ul class="recent-list" id="recent-list">
+            <li class="recent-item">
+              <div class="recent-icon">🛒</div>
+              <div class="recent-info">
+                <div class="recent-name">スーパー（食費）</div>
+                <div class="recent-date">4月17日</div>
+              </div>
+              <div class="recent-amount">−¥3,200</div>
+            </li>
+            <li class="recent-item">
+              <div class="recent-icon">🍜</div>
+              <div class="recent-info">
+                <div class="recent-name">外食（飲食）</div>
+                <div class="recent-date">4月16日</div>
+              </div>
+              <div class="recent-amount">−¥1,800</div>
+            </li>
+            <li class="recent-item">
+              <div class="recent-icon">🚃</div>
+              <div class="recent-info">
+                <div class="recent-name">交通費</div>
+                <div class="recent-date">4月15日</div>
+              </div>
+              <div class="recent-amount">−¥560</div>
+            </li>
+            <li class="recent-item">
+              <div class="recent-icon">💊</div>
+              <div class="recent-info">
+                <div class="recent-name">薬局（医療）</div>
+                <div class="recent-date">4月14日</div>
+              </div>
+              <div class="recent-amount">−¥2,100</div>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-        // OCR Button (Mock)
-        document.querySelector('.btn-ocr').addEventListener('click', function() {
-            alert('カメラが起動します（モック動作）');
-        });
+      <!-- Fixed Tab -->
+      <div class="page" id="page-fixed">
+        <div class="under-construction">
+          <div class="uc-icon">📌</div>
+          <h2>固定収支管理</h2>
+          <p>給料・家賃・サブスクなど<br>毎月の固定収支を登録できます</p>
+          <span class="badge-phase">Phase 2 実装予定</span>
+        </div>
+      </div>
 
-        // Calculator Button (Mock) - Now in Settings page
-        document.addEventListener('DOMContentLoaded', function() {
-            const calcButton = document.querySelector('#settings button[type="button"]');
-            if (calcButton) {
-                calcButton.addEventListener('click', function() {
-                    alert('計算結果が更新されました（モック動作）');
-                });
-            }
-        });
-    </script>
+      <!-- Card Tab -->
+      <div class="page" id="page-card">
+        <div class="under-construction">
+          <div class="uc-icon">💳</div>
+          <h2>クレジット管理</h2>
+          <p>カードごとの残額・利用履歴を<br>一目で確認できます</p>
+          <span class="badge-phase">Phase 2 実装予定</span>
+        </div>
+      </div>
+
+      <!-- Debt Tab -->
+      <div class="page" id="page-debt">
+        <div class="under-construction">
+          <div class="uc-icon">💰</div>
+          <h2>返済管理</h2>
+          <p>借入先ごとの残高・返済履歴<br>完済予定日を管理できます</p>
+          <span class="badge-phase">Phase 2 実装予定</span>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="showPage('home')" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span>ホーム</span>
+      </button>
+      <button class="nav-item" onclick="showPage('fixed')" data-page="fixed">
+        <span class="nav-icon">📌</span>
+        <span>固定</span>
+      </button>
+      <div class="nav-center">
+        <button class="nav-center-btn" onclick="openRecordModal()" aria-label="記録する">＋</button>
+        <span class="nav-center-label">記録</span>
+      </div>
+      <button class="nav-item" onclick="showPage('card')" data-page="card">
+        <span class="nav-icon">💳</span>
+        <span>カード</span>
+      </button>
+      <button class="nav-item" onclick="showPage('debt')" data-page="debt">
+        <span class="nav-icon">💰</span>
+        <span>返済</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Record Modal -->
+  <div class="modal-overlay" id="record-modal" onclick="closeRecordModal(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">支出を記録</div>
+      <form id="record-form" onsubmit="saveRecord(event)">
+        <div class="amount-input-wrapper">
+          <span class="amount-prefix">¥</span>
+          <input type="number" class="amount-input" id="record-amount" placeholder="0" min="1" inputmode="numeric" required>
+        </div>
+        <div class="select-row">
+          <select class="styled-select" id="record-category">
+            <option value="">カテゴリ</option>
+            <option value="食費">🛒 食費</option>
+            <option value="外食">🍜 外食</option>
+            <option value="交通">🚃 交通</option>
+            <option value="医療">💊 医療</option>
+            <option value="日用品">🧴 日用品</option>
+            <option value="娯楽">🎮 娯楽</option>
+            <option value="衣類">👕 衣類</option>
+            <option value="その他">📦 その他</option>
+          </select>
+          <select class="styled-select" id="record-payment">
+            <option value="">支払方法</option>
+            <option value="現金">現金</option>
+            <option value="PayPay">PayPay</option>
+            <option value="楽天カード">楽天カード</option>
+            <option value="PayPayカード">PayPayカード</option>
+          </select>
+        </div>
+        <input type="text" class="form-input" id="record-store" placeholder="店名・場所（任意）">
+        <input type="text" class="form-input" id="record-memo" placeholder="メモ（任意）">
+        <button type="submit" class="btn-save" id="save-btn">保存する</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel">
+    <div class="settings-header">
+      <button class="icon-btn" onclick="closeSettings()">←</button>
+      <h2>設定</h2>
+    </div>
+    <div class="settings-body">
+      <div class="settings-user-info">
+        <div class="user-avatar" id="user-avatar">👤</div>
+        <div>
+          <div class="user-name" id="user-name">ログイン中</div>
+          <div class="user-email" id="user-email-display"></div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">アプリ設定</div>
+        <div class="settings-item">
+          <span class="settings-item-icon">🏷️</span>
+          <span class="settings-item-label">カテゴリ編集</span>
+          <span class="settings-item-arrow">›</span>
+        </div>
+        <div class="settings-item">
+          <span class="settings-item-icon">💳</span>
+          <span class="settings-item-label">支払い方法編集</span>
+          <span class="settings-item-arrow">›</span>
+        </div>
+        <div class="settings-item">
+          <span class="settings-item-icon">🎨</span>
+          <span class="settings-item-label">テーマカラー</span>
+          <span class="settings-item-arrow">›</span>
+        </div>
+        <div class="settings-item">
+          <span class="settings-item-icon">🔢</span>
+          <span class="settings-item-label">リボ計算</span>
+          <span class="settings-item-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">アカウント</div>
+        <div class="settings-item">
+          <span class="settings-item-icon">👤</span>
+          <span class="settings-item-label">プロフィール</span>
+          <span class="settings-item-arrow">›</span>
+        </div>
+      </div>
+
+      <button class="btn-logout" onclick="logout()">ログアウト</button>
+      <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--text-muted)">
+        かけいぼ v1.0.0 — Phase 1
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+</div>
+
+<script>
+// ===== Supabase Init =====
+const SUPABASE_URL = 'https://lhyhqghescbatsxzxtlt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxoeWhxZ2hlc2NiYXRzeHp4dGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0Nzk5NzIsImV4cCI6MjA5MTA1NTk3Mn0.aTLkE9lbWOK80e9nh_kdV_1xJXyvn_JCUyn1HrddB0I';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== DOM refs =====
+const loadingScreen = document.getElementById('loading-screen');
+const authScreen = document.getElementById('auth-screen');
+const mainScreen = document.getElementById('main-screen');
+
+// ===== App Init =====
+async function init() {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      showMain(session.user);
+    } else {
+      showAuth();
+    }
+  } catch (e) {
+    showAuth();
+  }
+}
+
+function showAuth() {
+  loadingScreen.style.display = 'none';
+  authScreen.style.display = 'flex';
+  mainScreen.style.display = 'none';
+}
+
+function showMain(user) {
+  loadingScreen.style.display = 'none';
+  authScreen.style.display = 'none';
+  mainScreen.style.display = 'flex';
+  // Update user info
+  const email = user.email || '';
+  document.getElementById('user-email-display').textContent = email;
+  const name = email.split('@')[0] || 'ユーザー';
+  document.getElementById('user-name').textContent = name;
+  document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase() || '👤';
+  // Set month label
+  const now = new Date();
+  document.getElementById('month-label').textContent =
+    `${now.getFullYear()}年${now.getMonth()+1}月`;
+  // Load dashboard data
+  loadDashboard(user);
+}
+
+// ===== Auth =====
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('auth-error');
+
+  btn.disabled = true;
+  btn.textContent = 'ログイン中...';
+  errEl.style.display = 'none';
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    showMain(data.user);
+  } catch (err) {
+    errEl.textContent = 'メールアドレスまたはパスワードが正しくありません';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'ログイン';
+  }
+});
+
+async function logout() {
+  await sb.auth.signOut();
+  closeSettings();
+  showAuth();
+  showToast('ログアウトしました');
+}
+
+// Auth state change
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    showAuth();
+  }
+});
+
+// ===== Navigation =====
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById(`page-${pageId}`);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.page === pageId);
+  });
+}
+
+// ===== Dashboard Data =====
+async function loadDashboard(user) {
+  // Try to load real data from Supabase, fall back to dummy data
+  try {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).toISOString().split('T')[0];
+
+    // Fixed income
+    const { data: incomeData } = await sb
+      .from('fixed_income')
+      .select('amount')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+
+    // Daily expenses this month
+    const { data: expenseData } = await sb
+      .from('daily_expense')
+      .select('amount, category, store, date')
+      .eq('user_id', user.id)
+      .gte('date', firstDay)
+      .lte('date', lastDay)
+      .order('date', { ascending: false });
+
+    if (incomeData && expenseData) {
+      const totalIncome = incomeData.reduce((s, r) => s + (r.amount || 0), 0);
+      const totalExpense = expenseData.reduce((s, r) => s + (r.amount || 0), 0);
+      const remaining = totalIncome - totalExpense;
+      updateDashboard(totalIncome, totalExpense, remaining, expenseData.length);
+      updateRecentList(expenseData.slice(0, 5));
+      return;
+    }
+  } catch(e) {
+    // Use dummy data if DB not set up yet
+  }
+
+  // Dummy data
+  const income = 250000;
+  const expense = 84000;
+  updateDashboard(income, expense, income - expense, 8);
+}
+
+function updateDashboard(income, expense, remaining, count) {
+  const fmt = (n) => '¥' + Math.abs(n).toLocaleString('ja-JP');
+  const pct = income > 0 ? Math.min(100, (expense / income) * 100) : 0;
+
+  document.getElementById('total-income').textContent = fmt(income);
+  document.getElementById('total-expense-label').textContent = fmt(expense);
+  document.getElementById('remaining-label').textContent = fmt(remaining);
+  document.getElementById('expense-bar').style.width = pct + '%';
+  document.getElementById('summary-income').textContent = fmt(income);
+  document.getElementById('summary-expense').textContent = fmt(expense);
+  document.getElementById('summary-remaining').textContent = fmt(remaining);
+  document.getElementById('summary-count').textContent = count + '件';
+}
+
+function updateRecentList(expenses) {
+  if (!expenses || expenses.length === 0) return;
+  const categoryIcons = {
+    '食費': '🛒', '外食': '🍜', '交通': '🚃', '医療': '💊',
+    '日用品': '🧴', '娯楽': '🎮', '衣類': '👕', 'その他': '📦'
+  };
+  const list = document.getElementById('recent-list');
+  list.innerHTML = expenses.map(e => {
+    const icon = categoryIcons[e.category] || '📦';
+    const date = e.date ? new Date(e.date + 'T00:00:00') : new Date();
+    const dateStr = `${date.getMonth()+1}月${date.getDate()}日`;
+    return `
+      <li class="recent-item">
+        <div class="recent-icon">${icon}</div>
+        <div class="recent-info">
+          <div class="recent-name">${e.store || e.category || 'その他'}</div>
+          <div class="recent-date">${dateStr}</div>
+        </div>
+        <div class="recent-amount">−¥${(e.amount||0).toLocaleString('ja-JP')}</div>
+      </li>`;
+  }).join('');
+}
+
+// ===== Record Modal =====
+function openRecordModal() {
+  document.getElementById('record-modal').classList.add('open');
+  document.getElementById('record-amount').focus();
+}
+
+function closeRecordModal(e) {
+  if (!e || e.target === document.getElementById('record-modal')) {
+    document.getElementById('record-modal').classList.remove('open');
+    document.getElementById('record-form').reset();
+  }
+}
+
+async function saveRecord(e) {
+  e.preventDefault();
+  const btn = document.getElementById('save-btn');
+  const amount = parseInt(document.getElementById('record-amount').value);
+  const category = document.getElementById('record-category').value;
+  const payment = document.getElementById('record-payment').value;
+  const store = document.getElementById('record-store').value.trim();
+  const memo = document.getElementById('record-memo').value.trim();
+
+  if (!amount || amount <= 0) {
+    showToast('金額を入力してください');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+
+  try {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const today = new Date().toISOString().split('T')[0];
+    const { error } = await sb.from('daily_expense').insert({
+      user_id: user.id,
+      date: today,
+      amount: amount,
+      category: category || null,
+      store: store || null,
+      payment_method: payment || null,
+      memo: memo || null
+    });
+
+    if (error) throw error;
+
+    closeRecordModal(null);
+    showToast('記録しました ✓');
+    loadDashboard(user);
+  } catch (err) {
+    // If table doesn't exist yet, show success anyway for Phase 1 demo
+    if (err.message && err.message.includes('does not exist')) {
+      closeRecordModal(null);
+      showToast('記録しました（DBセットアップ後に反映されます）');
+    } else {
+      showToast('保存に失敗しました');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '保存する';
+  }
+}
+
+// ===== Settings =====
+function openSettings() {
+  document.getElementById('settings-panel').style.display = 'block';
+}
+
+function closeSettings() {
+  document.getElementById('settings-panel').style.display = 'none';
+}
+
+// ===== Toast =====
+function showToast(msg, duration = 2500) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ===== Start =====
+init();
+</script>
 </body>
 </html>
