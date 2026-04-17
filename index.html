@@ -1602,7 +1602,7 @@ async function loadCards(user) {
 
     const list = document.getElementById('card-list');
     list.innerHTML = cards.map(card => {
-      const usagePercent = (card.current_usage || 0) / (card.limit || 1) * 100;
+      const usagePercent = (card.current_usage || 0) / (card.credit_limit || 1) * 100;
       return `
         <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px">
           <div style="display: flex; justify-content: space-between; margin-bottom: 8px">
@@ -1610,7 +1610,7 @@ async function loadCards(user) {
             <button onclick="deleteCard('${card.id}')" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px">削除</button>
           </div>
           <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px">
-            <span>¥${(card.current_usage || 0).toLocaleString('ja-JP')} / ¥${(card.limit || 0).toLocaleString('ja-JP')}</span>
+            <span>¥${(card.current_usage || 0).toLocaleString('ja-JP')} / ¥${(card.credit_limit || 0).toLocaleString('ja-JP')}</span>
             <span>${Math.round(usagePercent)}%</span>
           </div>
           <div style="background: #e2e8f0; height: 4px; border-radius: 2px; overflow: hidden">
@@ -1637,7 +1637,7 @@ async function saveCard(e) {
   const usage = parseInt(document.getElementById('card-usage').value);
 
   try {
-    await sb.from('credit_cards').insert({ user_id: user.id, card_name: name, limit, current_usage: usage });
+    await sb.from('credit_cards').insert({ user_id: user.id, card_name: name, credit_limit: limit, current_usage: usage });
     document.getElementById('card-form').reset();
     toggleCardForm();
     showToast('カードを追加しました ✓');
@@ -1677,11 +1677,11 @@ async function loadDebts(user) {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px">
             <div>
               <div style="color: var(--text-muted)">借入額</div>
-              <div style="font-weight: 600">¥${(debt.amount || 0).toLocaleString('ja-JP')}</div>
+              <div style="font-weight: 600">¥${(debt.total_amount || 0).toLocaleString('ja-JP')}</div>
             </div>
             <div>
               <div style="color: var(--text-muted)">残高</div>
-              <div style="font-weight: 600">¥${(debt.balance || 0).toLocaleString('ja-JP')}</div>
+              <div style="font-weight: 600">¥${(debt.remaining || 0).toLocaleString('ja-JP')}</div>
             </div>
             <div style="grid-column: 1/-1">
               <div style="color: var(--text-muted)">完済予定日</div>
@@ -1695,7 +1695,7 @@ async function loadDebts(user) {
     // Update payment form dropdown
     const select = document.getElementById('payment-debt-id');
     select.innerHTML = '<option value="">返済対象を選択</option>' +
-      debts.map(debt => `<option value="${debt.id}">${debt.creditor_name} (残¥${(debt.balance || 0).toLocaleString('ja-JP')})</option>`).join('');
+      debts.map(debt => `<option value="${debt.id}">${debt.creditor_name} (残¥${(debt.remaining || 0).toLocaleString('ja-JP')})</option>`).join('');
   } catch (err) {
     console.error('Failed to load debts:', err);
   }
@@ -1714,7 +1714,7 @@ async function saveDebt(e) {
   const dueDate = document.getElementById('debt-due-date').value;
 
   try {
-    await sb.from('debts').insert({ user_id: user.id, creditor_name: name, amount, balance: amount, due_date: dueDate });
+    await sb.from('debts').insert({ user_id: user.id, creditor_name: name, total_amount: amount, remaining: amount, due_date: dueDate });
     document.getElementById('debt-form').reset();
     toggleDebtForm();
     showToast('借入を追加しました ✓');
@@ -1744,12 +1744,12 @@ async function addPayment(e) {
 
   try {
     // Add payment record
-    await sb.from('debt_payments').insert({ debt_id: debtId, amount, payment_date: new Date().toISOString().split('T')[0] });
+    await sb.from('debt_payments').insert({ debt_id: debtId, amount, date: new Date().toISOString().split('T')[0] });
 
-    // Update debt balance
-    const { data: debt } = await sb.from('debts').select('balance').eq('id', debtId).single();
-    const newBalance = Math.max(0, (debt?.balance || 0) - amount);
-    await sb.from('debts').update({ balance: newBalance }).eq('id', debtId);
+    // Update debt remaining
+    const { data: debt } = await sb.from('debts').select('remaining').eq('id', debtId).single();
+    const newBalance = Math.max(0, (debt?.remaining || 0) - amount);
+    await sb.from('debts').update({ remaining: newBalance }).eq('id', debtId);
 
     document.getElementById('payment-form').reset();
     showToast('返済を記録しました ✓');
