@@ -1060,31 +1060,105 @@
 
       <!-- Fixed Tab -->
       <div class="page" id="page-fixed">
-        <div class="under-construction">
-          <div class="uc-icon">📌</div>
-          <h2>固定収支管理</h2>
-          <p>給料・家賃・サブスクなど<br>毎月の固定収支を登録できます</p>
-          <span class="badge-phase">Phase 2 実装予定</span>
+        <div style="padding: 16px">
+          <div style="margin-bottom: 20px">
+            <h2 style="font-size: 20px; margin-bottom: 12px">📌 固定収支管理</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px">
+              <div style="background: #ccfbf1; padding: 12px; border-radius: 8px; text-align: center">
+                <div style="font-size: 12px; color: #0d9488">月間収入</div>
+                <div style="font-size: 20px; font-weight: bold; color: #0d9488" id="fixed-income">¥0</div>
+              </div>
+              <div style="background: #fed7aa; padding: 12px; border-radius: 8px; text-align: center">
+                <div style="font-size: 12px; color: #92400e">月間支出</div>
+                <div style="font-size: 20px; font-weight: bold; color: #92400e" id="fixed-expense">¥0</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 20px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
+              <h3 style="font-size: 14px; font-weight: 600">登録済み項目</h3>
+              <button onclick="toggleFixedForm()" style="background: var(--teal); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px">+ 追加</button>
+            </div>
+            <ul id="fixed-list" style="list-style: none">
+              <li style="padding: 12px; background: #f5f5f5; border-radius: 8px; text-align: center; color: var(--text-muted)">項目を読み込み中...</li>
+            </ul>
+          </div>
+
+          <form id="fixed-form" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+            <input type="text" id="fixed-name" placeholder="項目名（例：給料、家賃）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <input type="number" id="fixed-amount" placeholder="金額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <select id="fixed-type" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+              <option value="">種別を選択</option>
+              <option value="income">収入</option>
+              <option value="expense">支出</option>
+            </select>
+            <div style="display: flex; gap: 8px">
+              <button type="submit" style="flex: 1; background: var(--teal); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600">保存</button>
+              <button type="button" onclick="toggleFixedForm()" style="flex: 1; background: var(--border); color: var(--text); border: none; padding: 12px; border-radius: 6px; cursor: pointer">キャンセル</button>
+            </div>
+          </form>
         </div>
       </div>
 
       <!-- Card Tab -->
       <div class="page" id="page-card">
-        <div class="under-construction">
-          <div class="uc-icon">💳</div>
-          <h2>クレジット管理</h2>
-          <p>カードごとの残額・利用履歴を<br>一目で確認できます</p>
-          <span class="badge-phase">Phase 2 実装予定</span>
+        <div style="padding: 16px">
+          <div style="margin-bottom: 20px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
+              <h2 style="font-size: 20px">💳 クレジット管理</h2>
+              <button onclick="toggleCardForm()" style="background: var(--teal); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px">+ 新規カード</button>
+            </div>
+            <ul id="card-list" style="list-style: none; display: flex; flex-direction: column; gap: 12px">
+              <li style="padding: 12px; background: #f5f5f5; border-radius: 8px; text-align: center; color: var(--text-muted)">カード情報を読み込み中...</li>
+            </ul>
+          </div>
+
+          <form id="card-form" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+            <input type="text" id="card-name" placeholder="カード名（例：楽天カード）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <input type="number" id="card-limit" placeholder="利用限度額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <input type="number" id="card-usage" placeholder="今月利用額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <div style="display: flex; gap: 8px">
+              <button type="submit" style="flex: 1; background: var(--teal); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600">保存</button>
+              <button type="button" onclick="toggleCardForm()" style="flex: 1; background: var(--border); color: var(--text); border: none; padding: 12px; border-radius: 6px; cursor: pointer">キャンセル</button>
+            </div>
+          </form>
         </div>
       </div>
 
       <!-- Debt Tab -->
       <div class="page" id="page-debt">
-        <div class="under-construction">
-          <div class="uc-icon">💰</div>
-          <h2>返済管理</h2>
-          <p>借入先ごとの残高・返済履歴<br>完済予定日を管理できます</p>
-          <span class="badge-phase">Phase 2 実装予定</span>
+        <div style="padding: 16px">
+          <div style="margin-bottom: 20px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
+              <h2 style="font-size: 20px">💰 返済管理</h2>
+              <button onclick="toggleDebtForm()" style="background: var(--teal); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px">+ 新規借入</button>
+            </div>
+            <ul id="debt-list" style="list-style: none; display: flex; flex-direction: column; gap: 12px">
+              <li style="padding: 12px; background: #f5f5f5; border-radius: 8px; text-align: center; color: var(--text-muted)">借入情報を読み込み中...</li>
+            </ul>
+          </div>
+
+          <form id="debt-form" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+            <input type="text" id="debt-name" placeholder="借入先（例：銀行名）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <input type="number" id="debt-amount" placeholder="借入額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <input type="date" id="debt-due-date" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <div style="display: flex; gap: 8px">
+              <button type="submit" style="flex: 1; background: var(--teal); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600">保存</button>
+              <button type="button" onclick="toggleDebtForm()" style="flex: 1; background: var(--border); color: var(--text); border: none; padding: 12px; border-radius: 6px; cursor: pointer">キャンセル</button>
+            </div>
+          </form>
+
+          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border)">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px">返済実績</h3>
+            <form id="payment-form" onsubmit="addPayment(event)" style="background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+              <select id="payment-debt-id" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+                <option value="">返済対象を選択</option>
+              </select>
+              <input type="number" id="payment-amount" placeholder="返済額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+              <button type="submit" style="background: var(--teal); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600">返済を記録</button>
+            </form>
+          </div>
         </div>
       </div>
 
@@ -1260,6 +1334,9 @@ function showMain(user) {
     `${now.getFullYear()}年${now.getMonth()+1}月`;
   // Load dashboard data
   loadDashboard(user);
+  loadFixedItems(user);
+  loadCards(user);
+  loadDebts(user);
 }
 
 // ===== Auth =====
@@ -1299,6 +1376,11 @@ sb.auth.onAuthStateChange((event, session) => {
     showAuth();
   }
 });
+
+// ===== Form Listeners =====
+document.getElementById('fixed-form').addEventListener('submit', saveFixed);
+document.getElementById('card-form').addEventListener('submit', saveCard);
+document.getElementById('debt-form').addEventListener('submit', saveDebt);
 
 // ===== Navigation =====
 function showPage(pageId) {
@@ -1469,6 +1551,236 @@ function showToast(msg, duration = 2500) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ===== Fixed Items Management =====
+async function loadFixedItems(user) {
+  try {
+    const { data: items, error } = await sb.from('fixed_items').select('*').eq('user_id', user.id);
+    if (error) throw error;
+
+    const income = items.filter(i => i.type === 'income').reduce((sum, i) => sum + (i.amount || 0), 0);
+    const expense = items.filter(i => i.type === 'expense').reduce((sum, i) => sum + (i.amount || 0), 0);
+
+    document.getElementById('fixed-income').textContent = `¥${income.toLocaleString('ja-JP')}`;
+    document.getElementById('fixed-expense').textContent = `¥${expense.toLocaleString('ja-JP')}`;
+
+    const list = document.getElementById('fixed-list');
+    list.innerHTML = items.map(item => `
+      <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border: 1px solid var(--border); border-radius: 8px">
+        <div>
+          <div style="font-weight: 600; color: var(--text)">${item.item_name}</div>
+          <div style="font-size: 12px; color: var(--text-muted)">${item.type === 'income' ? '収入' : '支出'}</div>
+        </div>
+        <div style="text-align: right">
+          <div style="font-weight: 600; color: ${item.type === 'income' ? '#14b8a6' : '#f97316'}">¥${(item.amount || 0).toLocaleString('ja-JP')}</div>
+          <button onclick="deleteFixed('${item.id}')" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px; padding: 4px 0">削除</button>
+        </div>
+      </li>
+    `).join('') || '<li style="padding: 12px; text-align: center; color: var(--text-muted)">まだ項目がありません</li>';
+  } catch (err) {
+    console.error('Failed to load fixed items:', err);
+  }
+}
+
+function toggleFixedForm() {
+  const form = document.getElementById('fixed-form');
+  form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function saveFixed(e) {
+  e.preventDefault();
+  const user = (await sb.auth.getUser()).data.user;
+  const name = document.getElementById('fixed-name').value.trim();
+  const amount = parseInt(document.getElementById('fixed-amount').value);
+  const type = document.getElementById('fixed-type').value;
+
+  try {
+    await sb.from('fixed_items').insert({ user_id: user.id, item_name: name, amount, type });
+    document.getElementById('fixed-form').reset();
+    toggleFixedForm();
+    showToast('項目を追加しました ✓');
+    loadFixedItems(user);
+  } catch (err) {
+    showToast('保存に失敗しました');
+  }
+}
+
+async function deleteFixed(id) {
+  if (!confirm('削除してもよろしいですか？')) return;
+  const user = (await sb.auth.getUser()).data.user;
+  try {
+    await sb.from('fixed_items').delete().eq('id', id);
+    showToast('削除しました ✓');
+    loadFixedItems(user);
+  } catch (err) {
+    showToast('削除に失敗しました');
+  }
+}
+
+// ===== Card Management =====
+async function loadCards(user) {
+  try {
+    const { data: cards, error } = await sb.from('cards').select('*').eq('user_id', user.id);
+    if (error) throw error;
+
+    const list = document.getElementById('card-list');
+    list.innerHTML = cards.map(card => {
+      const usagePercent = (card.current_usage || 0) / (card.limit || 1) * 100;
+      return `
+        <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px">
+            <div style="font-weight: 600">${card.card_name}</div>
+            <button onclick="deleteCard('${card.id}')" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px">削除</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px">
+            <span>¥${(card.current_usage || 0).toLocaleString('ja-JP')} / ¥${(card.limit || 0).toLocaleString('ja-JP')}</span>
+            <span>${Math.round(usagePercent)}%</span>
+          </div>
+          <div style="background: #e2e8f0; height: 4px; border-radius: 2px; overflow: hidden">
+            <div style="background: ${usagePercent > 80 ? '#ef4444' : '#14b8a6'}; height: 100%; width: ${Math.min(usagePercent, 100)}%"></div>
+          </div>
+        </div>
+      `;
+    }).join('') || '<li style="padding: 12px; text-align: center; color: var(--text-muted)">まだカードがありません</li>';
+  } catch (err) {
+    console.error('Failed to load cards:', err);
+  }
+}
+
+function toggleCardForm() {
+  const form = document.getElementById('card-form');
+  form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function saveCard(e) {
+  e.preventDefault();
+  const user = (await sb.auth.getUser()).data.user;
+  const name = document.getElementById('card-name').value.trim();
+  const limit = parseInt(document.getElementById('card-limit').value);
+  const usage = parseInt(document.getElementById('card-usage').value);
+
+  try {
+    await sb.from('cards').insert({ user_id: user.id, card_name: name, limit, current_usage: usage });
+    document.getElementById('card-form').reset();
+    toggleCardForm();
+    showToast('カードを追加しました ✓');
+    loadCards(user);
+  } catch (err) {
+    showToast('保存に失敗しました');
+  }
+}
+
+async function deleteCard(id) {
+  if (!confirm('削除してもよろしいですか？')) return;
+  const user = (await sb.auth.getUser()).data.user;
+  try {
+    await sb.from('cards').delete().eq('id', id);
+    showToast('削除しました ✓');
+    loadCards(user);
+  } catch (err) {
+    showToast('削除に失敗しました');
+  }
+}
+
+// ===== Debt Management =====
+async function loadDebts(user) {
+  try {
+    const { data: debts, error } = await sb.from('debts').select('*').eq('user_id', user.id);
+    if (error) throw error;
+
+    const list = document.getElementById('debt-list');
+    list.innerHTML = debts.map(debt => {
+      const dueDate = new Date(debt.due_date).toLocaleDateString('ja-JP');
+      return `
+        <div style="background: white; border: 1px solid var(--border); border-radius: 8px; padding: 12px">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px">
+            <div style="font-weight: 600">${debt.creditor_name}</div>
+            <button onclick="deleteDebt('${debt.id}')" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px">削除</button>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px">
+            <div>
+              <div style="color: var(--text-muted)">借入額</div>
+              <div style="font-weight: 600">¥${(debt.amount || 0).toLocaleString('ja-JP')}</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted)">残高</div>
+              <div style="font-weight: 600">¥${(debt.balance || 0).toLocaleString('ja-JP')}</div>
+            </div>
+            <div style="grid-column: 1/-1">
+              <div style="color: var(--text-muted)">完済予定日</div>
+              <div style="font-weight: 600">${dueDate}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('') || '<li style="padding: 12px; text-align: center; color: var(--text-muted)">まだ借入がありません</li>';
+
+    // Update payment form dropdown
+    const select = document.getElementById('payment-debt-id');
+    select.innerHTML = '<option value="">返済対象を選択</option>' +
+      debts.map(debt => `<option value="${debt.id}">${debt.creditor_name} (残¥${(debt.balance || 0).toLocaleString('ja-JP')})</option>`).join('');
+  } catch (err) {
+    console.error('Failed to load debts:', err);
+  }
+}
+
+function toggleDebtForm() {
+  const form = document.getElementById('debt-form');
+  form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+}
+
+async function saveDebt(e) {
+  e.preventDefault();
+  const user = (await sb.auth.getUser()).data.user;
+  const name = document.getElementById('debt-name').value.trim();
+  const amount = parseInt(document.getElementById('debt-amount').value);
+  const dueDate = document.getElementById('debt-due-date').value;
+
+  try {
+    await sb.from('debts').insert({ user_id: user.id, creditor_name: name, amount, balance: amount, due_date: dueDate });
+    document.getElementById('debt-form').reset();
+    toggleDebtForm();
+    showToast('借入を追加しました ✓');
+    loadDebts(user);
+  } catch (err) {
+    showToast('保存に失敗しました');
+  }
+}
+
+async function deleteDebt(id) {
+  if (!confirm('削除してもよろしいですか？')) return;
+  const user = (await sb.auth.getUser()).data.user;
+  try {
+    await sb.from('debts').delete().eq('id', id);
+    showToast('削除しました ✓');
+    loadDebts(user);
+  } catch (err) {
+    showToast('削除に失敗しました');
+  }
+}
+
+async function addPayment(e) {
+  e.preventDefault();
+  const user = (await sb.auth.getUser()).data.user;
+  const debtId = document.getElementById('payment-debt-id').value;
+  const amount = parseInt(document.getElementById('payment-amount').value);
+
+  try {
+    // Add payment record
+    await sb.from('debt_payments').insert({ debt_id: debtId, amount, payment_date: new Date().toISOString().split('T')[0] });
+
+    // Update debt balance
+    const { data: debt } = await sb.from('debts').select('balance').eq('id', debtId).single();
+    const newBalance = Math.max(0, (debt?.balance || 0) - amount);
+    await sb.from('debts').update({ balance: newBalance }).eq('id', debtId);
+
+    document.getElementById('payment-form').reset();
+    showToast('返済を記録しました ✓');
+    loadDebts(user);
+  } catch (err) {
+    showToast('記録に失敗しました');
+  }
 }
 
 // ===== Start =====
