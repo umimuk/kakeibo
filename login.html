@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ログイン - かけいぼ</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --teal: #14b8a6;
+      --teal-dark: #0d9488;
+      --teal-light: #ccfbf1;
+      --bg: #f0fafa;
+      --white: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', 'Segoe UI', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .auth-logo {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--teal);
+      letter-spacing: -1px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .auth-tagline {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .auth-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 4px 24px rgba(20,184,166,0.12);
+    }
+
+    .auth-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 50px;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: white;
+    }
+
+    .btn-primary:active {
+      background: var(--teal-dark);
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .auth-error {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--danger);
+      display: none;
+    }
+
+    .auth-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .auth-footer a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.15s;
+    }
+
+    .auth-footer a:active {
+      color: var(--teal-dark);
+    }
+
+    .loading {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="auth-container">
+    <div class="auth-logo">かけいぼ</div>
+    <div class="auth-tagline">家計管理をシンプルに</div>
+
+    <div class="auth-card">
+      <h2>ログイン</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label">メールアドレス</label>
+          <input
+            type="email"
+            id="email"
+            class="form-input"
+            placeholder="your@email.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">パスワード</label>
+          <input
+            type="password"
+            id="password"
+            class="form-input"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <div id="auth-error" class="auth-error"></div>
+
+        <button type="submit" id="login-btn" class="btn btn-primary">
+          ログイン
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        アカウントをお持ちでありませんか？
+        <a href="/signup.html">新規登録</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Supabase Init =====
+const SUPABASE_URL = 'https://lhyhqghescbatsxzxtlt.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxoeWhxZ2hlc2NiYXRzeHp4dGx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0Nzk5NzIsImV4cCI6MjA5MTA1NTk3Mn0.aTLkE9lbWOK80e9nh_kdV_1xJXyvn_JCUyn1HrddB0I';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== Auth Redirect =====
+(async () => {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    // ログイン済みなら dashboard へリダイレクト
+    if (session) {
+      window.location.replace('/index.html');
+    }
+  } catch (e) {
+    // Continue with login page
+  }
+})();
+
+// ===== Login Form =====
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('auth-error');
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = 'ログイン中...';
+  errEl.style.display = 'none';
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    window.location.replace('/index.html');
+  } catch (err) {
+    errEl.textContent = 'メールアドレスまたはパスワードが正しくありません';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'ログイン';
+  }
+});
+</script>
+</body>
+</html>
