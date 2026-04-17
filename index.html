@@ -1522,8 +1522,16 @@ function showToast(msg, duration = 2500) {
 // ===== Fixed Items Management =====
 async function loadFixedItems(user) {
   try {
-    const { data: items, error } = await sb.from('fixed_items').select('*').eq('user_id', user.id);
-    if (error) throw error;
+    const [{ data: incomeItems, error: e1 }, { data: expenseItems, error: e2 }] = await Promise.all([
+      sb.from('fixed_income').select('*').eq('user_id', user.id),
+      sb.from('fixed_expense').select('*').eq('user_id', user.id),
+    ]);
+    if (e1 || e2) throw new Error('Failed to load fixed items');
+
+    const items = [
+      ...incomeItems.map(i => ({ ...i, type: 'income' })),
+      ...expenseItems.map(i => ({ ...i, type: 'expense' })),
+    ];
 
     const income = items.filter(i => i.type === 'income').reduce((sum, i) => sum + (i.amount || 0), 0);
     const expense = items.filter(i => i.type === 'expense').reduce((sum, i) => sum + (i.amount || 0), 0);
@@ -1540,7 +1548,7 @@ async function loadFixedItems(user) {
         </div>
         <div style="text-align: right">
           <div style="font-weight: 600; color: ${item.type === 'income' ? '#14b8a6' : '#f97316'}">¥${(item.amount || 0).toLocaleString('ja-JP')}</div>
-          <button onclick="deleteFixed('${item.id}')" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px; padding: 4px 0">削除</button>
+          <button onclick="deleteFixed('${item.id}', '${item.type}')" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 12px; padding: 4px 0">削除</button>
         </div>
       </li>
     `).join('') || '<li style="padding: 12px; text-align: center; color: var(--text-muted)">まだ項目がありません</li>';
@@ -1562,7 +1570,8 @@ async function saveFixed(e) {
   const type = document.getElementById('fixed-type').value;
 
   try {
-    await sb.from('fixed_items').insert({ user_id: user.id, item_name: name, amount, type });
+    const tableName = type === 'income' ? 'fixed_income' : 'fixed_expense';
+    await sb.from(tableName).insert({ user_id: user.id, item_name: name, amount });
     document.getElementById('fixed-form').reset();
     toggleFixedForm();
     showToast('項目を追加しました ✓');
@@ -1572,11 +1581,12 @@ async function saveFixed(e) {
   }
 }
 
-async function deleteFixed(id) {
+async function deleteFixed(id, type) {
   if (!confirm('削除してもよろしいですか？')) return;
   const user = (await sb.auth.getUser()).data.user;
   try {
-    await sb.from('fixed_items').delete().eq('id', id);
+    const tableName = type === 'income' ? 'fixed_income' : 'fixed_expense';
+    await sb.from(tableName).delete().eq('id', id);
     showToast('削除しました ✓');
     loadFixedItems(user);
   } catch (err) {
