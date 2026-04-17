@@ -1163,8 +1163,6 @@
             <option value="">支払方法</option>
             <option value="現金">現金</option>
             <option value="PayPay">PayPay</option>
-            <option value="楽天カード">楽天カード</option>
-            <option value="PayPayカード">PayPayカード</option>
           </select>
         </div>
         <input type="text" class="form-input" id="record-store" placeholder="店名・場所（任意）">
@@ -1589,7 +1587,7 @@ async function deleteFixed(id) {
 // ===== Card Management =====
 async function loadCards(user) {
   try {
-    const { data: cards, error } = await sb.from('cards').select('*').eq('user_id', user.id);
+    const { data: cards, error } = await sb.from('credit_cards').select('*').eq('user_id', user.id);
     if (error) throw error;
 
     const list = document.getElementById('card-list');
@@ -1629,7 +1627,7 @@ async function saveCard(e) {
   const usage = parseInt(document.getElementById('card-usage').value);
 
   try {
-    await sb.from('cards').insert({ user_id: user.id, card_name: name, limit, current_usage: usage });
+    await sb.from('credit_cards').insert({ user_id: user.id, card_name: name, limit, current_usage: usage });
     document.getElementById('card-form').reset();
     toggleCardForm();
     showToast('カードを追加しました ✓');
@@ -1643,7 +1641,7 @@ async function deleteCard(id) {
   if (!confirm('削除してもよろしいですか？')) return;
   const user = (await sb.auth.getUser()).data.user;
   try {
-    await sb.from('cards').delete().eq('id', id);
+    await sb.from('credit_cards').delete().eq('id', id);
     showToast('削除しました ✓');
     loadCards(user);
   } catch (err) {
