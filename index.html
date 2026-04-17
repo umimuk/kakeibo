@@ -1299,16 +1299,16 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data: { session } } = await sb.auth.getSession();
     // 未ログイン状態で index.html → login.html へリダイレクト
     if (!session && !window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('/signup.html')) {
-      window.location.replace('/login.html');
+      window.location.replace('./login.html');
     }
     // ログイン済みで login.html や signup.html → index.html へリダイレクト
     if (session && (window.location.pathname.endsWith('/login.html') || window.location.pathname.endsWith('/signup.html'))) {
-      window.location.replace('/index.html');
+      window.location.replace('./index.html');
     }
   } catch (e) {
     // Redirect to login on error
     if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('/signup.html')) {
-      window.location.replace('/login.html');
+      window.location.replace('./login.html');
     }
   }
 })();

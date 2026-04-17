@@ -240,7 +240,7 @@
 
       <div class="auth-footer">
         既にアカウントをお持ちですか？
-        <a href="/login.html">ログイン</a>
+        <a href="./login.html">ログイン</a>
       </div>
     </div>
   </div>
@@ -260,7 +260,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data: { session } } = await sb.auth.getSession();
     // ログイン済みなら dashboard へリダイレクト
     if (session) {
-      window.location.replace('/index.html');
+      window.location.replace('./index.html');
     }
   } catch (e) {
     // Continue with signup page
@@ -306,7 +306,7 @@ document.getElementById('signup-form').addEventListener('submit', async (e) => {
     if (error) throw error;
 
     // Success - redirect to dashboard (auto-login after signup)
-    window.location.replace('/index.html');
+    window.location.replace('./index.html');
   } catch (err) {
     let errorMessage = 'アカウント作成に失敗しました';
     if (err.message && err.message.includes('already registered')) {

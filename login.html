@@ -219,7 +219,7 @@
 
       <div class="auth-footer">
         アカウントをお持ちでありませんか？
-        <a href="/signup.html">新規登録</a>
+        <a href="./signup.html">新規登録</a>
       </div>
     </div>
   </div>
@@ -239,7 +239,7 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data: { session } } = await sb.auth.getSession();
     // ログイン済みなら dashboard へリダイレクト
     if (session) {
-      window.location.replace('/index.html');
+      window.location.replace('./index.html');
     }
   } catch (e) {
     // Continue with login page
@@ -262,7 +262,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   try {
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    window.location.replace('/index.html');
+    window.location.replace('./index.html');
   } catch (err) {
     errEl.textContent = 'メールアドレスまたはパスワードが正しくありません';
     errEl.style.display = 'block';
