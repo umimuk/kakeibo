@@ -176,6 +176,34 @@
       cursor: not-allowed;
     }
 
+    .auth-tab {
+      flex: 1;
+      padding: 12px 0;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .auth-tab.active {
+      color: var(--teal);
+    }
+
+    .auth-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -24px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--teal);
+    }
+
     .auth-error {
       margin-top: 12px;
       padding: 10px 14px;
@@ -924,8 +952,14 @@
     <div class="auth-logo">かけいぼ</div>
     <div class="auth-tagline">2人でかんたん家計管理</div>
     <div class="auth-card">
-      <h2>ログイン</h2>
-      <form id="login-form">
+      <!-- Auth Tabs -->
+      <div style="display: flex; margin-bottom: 24px; border-bottom: 1px solid var(--border)">
+        <button class="auth-tab active" id="tab-login">ログイン</button>
+        <button class="auth-tab" id="tab-signup">新規登録</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" style="display:block">
         <div class="form-group">
           <label class="form-label" for="email">メールアドレス</label>
           <input type="email" id="email" class="form-input" placeholder="example@email.com" autocomplete="email" required>
@@ -936,6 +970,24 @@
         </div>
         <button type="submit" class="btn btn-primary" id="login-btn">ログイン</button>
         <div class="auth-error" id="auth-error"></div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signup-form" style="display:none">
+        <div class="form-group">
+          <label class="form-label" for="signup-email">メールアドレス</label>
+          <input type="email" id="signup-email" class="form-input" placeholder="example@email.com" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">パスワード（8文字以上）</label>
+          <input type="password" id="signup-password" class="form-input" placeholder="••••••••" minlength="8" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password-confirm">パスワード（確認）</label>
+          <input type="password" id="signup-password-confirm" class="form-input" placeholder="••••••••" minlength="8" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="signup-btn">新規登録</button>
+        <div class="auth-error" id="signup-error"></div>
       </form>
     </div>
   </div>
@@ -1326,6 +1378,107 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'ログイン';
+  }
+});
+
+// Tab switching for login/signup
+document.getElementById('tab-login').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('login-form').style.display = 'block';
+  document.getElementById('signup-form').style.display = 'none';
+  document.getElementById('tab-login').classList.add('active');
+  document.getElementById('tab-signup').classList.remove('active');
+});
+
+document.getElementById('tab-signup').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('login-form').style.display = 'none';
+  document.getElementById('signup-form').style.display = 'block';
+  document.getElementById('tab-login').classList.remove('active');
+  document.getElementById('tab-signup').classList.add('active');
+});
+
+// Signup form handler
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const passwordConfirm = document.getElementById('signup-password-confirm').value;
+  const btn = document.getElementById('signup-btn');
+  const errEl = document.getElementById('signup-error');
+
+  // Validate inputs
+  if (!email || !password || !passwordConfirm) {
+    errEl.textContent = 'すべての項目を入力してください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    errEl.textContent = 'パスワードが一致しません';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  if (password.length < 8) {
+    errEl.textContent = 'パスワードは8文字以上にしてください';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '作成中...';
+  errEl.style.display = 'none';
+
+  try {
+    // Create auth user
+    const { data: authData, error: authError } = await sb.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin
+      }
+    });
+
+    if (authError) throw authError;
+
+    // Insert profile
+    if (authData.user) {
+      const { error: profileError } = await sb.from('user_profiles').insert({
+        id: authData.user.id,
+        display_name: null,
+        theme_color: 'teal'
+      });
+
+      if (profileError && !profileError.message.includes('duplicate')) {
+        console.warn('Profile insert warning:', profileError);
+      }
+    }
+
+    // Success
+    errEl.style.display = 'none';
+    errEl.textContent = '';
+    btn.disabled = false;
+    btn.textContent = '新規登録';
+
+    // Switch to login and show message
+    document.getElementById('signup-form').reset();
+    errEl.textContent = '登録完了！ログインしてください';
+    errEl.style.color = 'var(--income)';
+    errEl.style.display = 'block';
+
+    // Auto-switch to login after 1.5 sec
+    setTimeout(() => {
+      document.getElementById('tab-login').click();
+      document.getElementById('email').value = email;
+      errEl.style.color = 'var(--danger)';
+    }, 1500);
+
+  } catch (err) {
+    errEl.textContent = err.message || '登録に失敗しました';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '新規登録';
   }
 });
 
@@ -1764,3 +1917,4 @@ init();
 </script>
 </body>
 </html>
+
