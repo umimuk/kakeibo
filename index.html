@@ -1787,15 +1787,16 @@ async function saveCard(e) {
   const limit = parseInt(document.getElementById('card-limit').value);
   const usage = parseInt(document.getElementById('card-usage').value);
 
-  try {
-    await sb.from('credit_cards').insert({ user_id: user.id, card_name: name, credit_limit: limit, current_usage: usage });
-    document.getElementById('card-form').reset();
-    toggleCardForm();
-    showToast('カードを追加しました ✓');
-    loadCards(user);
-  } catch (err) {
-    showToast('保存に失敗しました');
+  const { error: cardError } = await sb.from('credit_cards').insert({ user_id: user.id, card_name: name, credit_limit: limit, current_usage: usage });
+  if (cardError) {
+    console.error('カード保存エラー:', cardError);
+    showToast('保存に失敗しました: ' + cardError.message);
+    return;
   }
+  document.getElementById('card-form').reset();
+  toggleCardForm();
+  showToast('カードを追加しました ✓');
+  loadCards(user);
 }
 
 async function deleteCard(id) {
@@ -1915,6 +1916,7 @@ init();
 </script>
 </body>
 </html>
+
 
 
 
