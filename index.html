@@ -1085,7 +1085,7 @@
             </ul>
           </div>
 
-          <form id="fixed-form" onsubmit="saveFixed(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+          <form id="fixed-form" onsubmit="saveFixed(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; flex-direction: column">
             <input type="text" id="fixed-name" placeholder="項目名（例：給料、家賃）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
             <input type="number" id="fixed-amount" placeholder="金額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
             <select id="fixed-type" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
@@ -1114,7 +1114,7 @@
             </ul>
           </div>
 
-          <form id="card-form" onsubmit="saveCard(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+          <form id="card-form" onsubmit="saveCard(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; flex-direction: column">
             <input type="text" id="card-name" placeholder="カード名（例：楽天カード）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
             <input type="number" id="card-limit" placeholder="利用限度額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
             <input type="number" id="card-usage" placeholder="今月利用額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
@@ -1139,9 +1139,10 @@
             </ul>
           </div>
 
-          <form id="debt-form" onsubmit="saveDebt(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; display: flex; flex-direction: column">
+          <form id="debt-form" onsubmit="saveDebt(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; flex-direction: column">
             <input type="text" id="debt-name" placeholder="借入先（例：銀行名）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
             <input type="number" id="debt-amount" placeholder="借入額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
+            <label style="font-size: 13px; color: var(--text-muted); margin-bottom: -8px">完済日</label>
             <input type="date" id="debt-due-date" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
             <div style="display: flex; gap: 8px">
               <button type="submit" style="flex: 1; background: var(--teal); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600">保存</button>
@@ -1914,5 +1915,6 @@ init();
 </script>
 </body>
 </html>
+
 
 
