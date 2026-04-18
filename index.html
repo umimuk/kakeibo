@@ -1497,9 +1497,6 @@ sb.auth.onAuthStateChange((event, session) => {
 });
 
 // ===== Form Listeners =====
-document.getElementById('fixed-form').addEventListener('submit', saveFixed);
-document.getElementById('card-form').addEventListener('submit', saveCard);
-document.getElementById('debt-form').addEventListener('submit', saveDebt);
 
 // ===== Navigation =====
 function showPage(pageId) {
@@ -1696,7 +1693,7 @@ async function loadFixedItems(user) {
     list.innerHTML = items.map(item => `
       <li style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; border: 1px solid var(--border); border-radius: 8px">
         <div>
-          <div style="font-weight: 600; color: var(--text)">${item.item_name}</div>
+          <div style="font-weight: 600; color: var(--text)">${item.name}</div>
           <div style="font-size: 12px; color: var(--text-muted)">${item.type === 'income' ? '収入' : '支出'}</div>
         </div>
         <div style="text-align: right">
@@ -1724,7 +1721,7 @@ async function saveFixed(e) {
 
   try {
     const tableName = type === 'income' ? 'fixed_income' : 'fixed_expense';
-    await sb.from(tableName).insert({ user_id: user.id, item_name: name, amount });
+    await sb.from(tableName).insert({ user_id: user.id, name: name, amount });
     document.getElementById('fixed-form').reset();
     toggleFixedForm();
     showToast('項目を追加しました ✓');
@@ -1917,4 +1914,5 @@ init();
 </script>
 </body>
 </html>
+
 
