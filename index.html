@@ -1750,6 +1750,13 @@ async function loadCards(user) {
     const { data: cards, error } = await sb.from('credit_cards').select('*').eq('user_id', user.id);
     if (error) throw error;
 
+    // 支払い方法セレクトを更新（現金・PayPay固定 + 登録済みカード）
+    const paySelect = document.getElementById('record-payment');
+    if (paySelect) {
+      paySelect.innerHTML = '<option value="">支払方法</option><option value="現金">現金</option><option value="PayPay">PayPay</option>'
+        + (cards || []).map(card => `<option value="${card.card_name}">${card.card_name}</option>`).join('');
+    }
+
     const list = document.getElementById('card-list');
     list.innerHTML = cards.map(card => {
       const usagePercent = (card.current_usage || 0) / (card.credit_limit || 1) * 100;
@@ -1914,6 +1921,7 @@ init();
 </script>
 </body>
 </html>
+
 
 
 
