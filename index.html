@@ -1524,6 +1524,13 @@ async function loadDashboard(user) {
       .eq('user_id', user.id)
       .eq('is_active', true);
 
+    // Fixed expense
+    const { data: fixedExpenseData } = await sb
+      .from('fixed_expense')
+      .select('amount')
+      .eq('user_id', user.id)
+      .eq('is_active', true);
+
     // Daily expenses this month
     const { data: expenseData } = await sb
       .from('daily_expense')
@@ -1533,9 +1540,11 @@ async function loadDashboard(user) {
       .lte('date', lastDay)
       .order('date', { ascending: false });
 
-    if (incomeData && expenseData) {
+    if (incomeData && fixedExpenseData && expenseData) {
       const totalIncome = incomeData.reduce((s, r) => s + (r.amount || 0), 0);
-      const totalExpense = expenseData.reduce((s, r) => s + (r.amount || 0), 0);
+      const totalFixedExpense = fixedExpenseData.reduce((s, r) => s + (r.amount || 0), 0);
+      const totalDailyExpense = expenseData.reduce((s, r) => s + (r.amount || 0), 0);
+      const totalExpense = totalFixedExpense + totalDailyExpense;
       const remaining = totalIncome - totalExpense;
       updateDashboard(totalIncome, totalExpense, remaining, expenseData.length);
       updateRecentList(expenseData.slice(0, 5));
@@ -1719,14 +1728,25 @@ async function saveFixed(e) {
   const amount = parseInt(document.getElementById('fixed-amount').value);
   const type = document.getElementById('fixed-type').value;
 
+  if (!name || !amount || !type) {
+    showToast('すべてのフィールドを入力してください');
+    return;
+  }
+
   try {
     const tableName = type === 'income' ? 'fixed_income' : 'fixed_expense';
-    await sb.from(tableName).insert({ user_id: user.id, name: name, amount });
+    await sb.from(tableName).insert({
+      user_id: user.id,
+      name: name,
+      amount: amount,
+      category: type
+    });
     document.getElementById('fixed-form').reset();
     toggleFixedForm();
     showToast('項目を追加しました ✓');
     loadFixedItems(user);
   } catch (err) {
+    console.error('Save error:', err);
     showToast('保存に失敗しました');
   }
 }
