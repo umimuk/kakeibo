@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>収支履歴 | かけいぼ</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    :root {
+      --teal: #14b8a6;
+      --teal-dark: #0d9488;
+      --teal-light: #ccfbf1;
+      --bg: #f0fafa;
+      --white: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --income: #14b8a6;
+      --expense: #f97316;
+      --shadow: 0 1px 4px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 24px;
+    }
+    /* ヘッダー */
+    .page-header {
+      background: var(--teal);
+      color: #fff;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      padding: 2px 6px;
+      line-height: 1;
+    }
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    /* フィルター */
+    .filter-bar {
+      background: var(--white);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .filter-bar label {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .filter-bar select {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      color: var(--text);
+      background: var(--white);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    /* サマリー */
+    .summary-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+    }
+    .summary-item {
+      flex: 1;
+      text-align: center;
+    }
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .summary-value {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .summary-value.income { color: var(--income); }
+    .summary-value.expense { color: var(--expense); }
+    .summary-value.balance { color: var(--text); }
+    /* リスト */
+    .list {
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .item {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .item-left {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+    .item-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .item-category {
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-memo {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .item-amount {
+      font-size: 17px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .item-amount.income { color: var(--income); }
+    .item-amount.expense { color: var(--expense); }
+    /* 空・ローディング */
+    .empty {
+      text-align: center;
+      padding: 48px 16px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .loading {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <button class="back-btn" onclick="history.back()">←</button>
+    <h1 class="page-title">収支履歴</h1>
+  </header>
+
+  <div class="filter-bar">
+    <label for="month-select">月：</label>
+    <select id="month-select" onchange="loadTransactions()"></select>
+  </div>
+
+  <div class="summary-bar" id="summary-bar" style="display:none">
+    <div class="summary-item">
+      <div class="summary-label">収入</div>
+      <div class="summary-value income" id="sum-income">¥0</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">支出</div>
+      <div class="summary-value expense" id="sum-expense">¥0</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-label">収支</div>
+      <div class="summary-value balance" id="sum-balance">¥0</div>
+    </div>
+  </div>
+
+  <div class="list" id="list">
+    <div class="loading">読み込み中...</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://bmlwitukylqgffzfuouv.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtbHdpdHVreWxxZ2ZmemZ1b3V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0Mjc2MjAsImV4cCI6MjA5MjAwMzYyMH0.qDpRnBzYUonlW-v0txxBPSSmEg1iFR7nv2ChnV_4xpQ';
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 月セレクトを初期化（直近12ヶ月 + 「すべて」）
+    function initMonthSelect() {
+      const sel = document.getElementById('month-select');
+      sel.innerHTML = '<option value="">すべて</option>';
+      const now = new Date();
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const val = d.toISOString().slice(0, 7); // "YYYY-MM"
+        const label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = label;
+        if (i === 0) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    }
+
+    function nextMonth(ym) {
+      const [y, m] = ym.split('-').map(Number);
+      return m === 12
+        ? `${y + 1}-01`
+        : `${y}-${String(m + 1).padStart(2, '0')}`;
+    }
+
+    async function loadTransactions() {
+      const month = document.getElementById('month-select').value;
+      const list = document.getElementById('list');
+      const summaryBar = document.getElementById('summary-bar');
+      list.innerHTML = '<div class="loading">読み込み中...</div>';
+
+      let query = sb.from('transactions').select('*').order('date', { ascending: false });
+      if (month) {
+        query = query
+          .gte('date', month + '-01')
+          .lt('date', nextMonth(month) + '-01');
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div>データ取得に失敗しました</div></div>`;
+        summaryBar.style.display = 'none';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div>履歴がありません</div></div>`;
+        summaryBar.style.display = 'none';
+        return;
+      }
+
+      // サマリー計算
+      const totalIncome  = data.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
+      const totalExpense = data.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
+      const balance = totalIncome - totalExpense;
+      document.getElementById('sum-income').textContent  = `¥${totalIncome.toLocaleString()}`;
+      document.getElementById('sum-expense').textContent = `¥${totalExpense.toLocaleString()}`;
+      const balEl = document.getElementById('sum-balance');
+      balEl.textContent = `${balance >= 0 ? '+' : ''}¥${balance.toLocaleString()}`;
+      balEl.style.color = balance >= 0 ? 'var(--income)' : 'var(--expense)';
+      summaryBar.style.display = 'flex';
+
+      // 一覧描画
+      list.innerHTML = data.map(t => {
+        const isIncome = t.type === 'income';
+        const sign = isIncome ? '+' : '-';
+        const cls  = isIncome ? 'income' : 'expense';
+        return `
+          <div class="item">
+            <div class="item-left">
+              <span class="item-date">${t.date || ''}</span>
+              <span class="item-category">${t.category || '未分類'}</span>
+              ${t.memo ? `<span class="item-memo">${t.memo}</span>` : ''}
+            </div>
+            <span class="item-amount ${cls}">${sign}¥${Number(t.amount || 0).toLocaleString()}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 初期化
+    initMonthSelect();
+    loadTransactions();
+  </script>
+</body>
+</html>
