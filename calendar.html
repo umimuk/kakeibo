@@ -358,6 +358,7 @@
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentDate = new Date();
+    let currentUser = null;  // 【修正1】ログインユーザーを保存
     let expenses = {};
 
     async function init() {
@@ -368,6 +369,7 @@
           return;
         }
 
+        currentUser = user;  // 【修正1】ユーザーをグローバルに保存
         await loadExpenses();
         renderCalendar();
       } catch (err) {
@@ -388,6 +390,7 @@
       const { data, error } = await sb
         .from('daily_expense')
         .select('*')
+        .eq('user_id', currentUser.id)  // 【修正1】ログインユーザーのデータのみ取得
         .gte('date', monthStart)
         .lte('date', monthEndStr);
 
@@ -404,6 +407,19 @@
         expenses[row.date].total += row.amount;
         expenses[row.date].items.push(row);
       });
+    }
+
+    // 【修正2】XSS対策: HTML特殊文字をエスケープ
+    function escapeHtml(text) {
+      if (!text) return '';
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
     }
 
     function renderCalendar() {
@@ -463,8 +479,8 @@
         exp.items.forEach(item => {
           html += `<div class="expense-item">
             <div class="expense-info">
-              <div class="expense-category">${item.category}</div>
-              ${item.description ? `<div class="expense-description">${item.description}</div>` : ''}
+              <div class="expense-category">${escapeHtml(item.category)}</div>
+              ${item.description ? `<div class="expense-description">${escapeHtml(item.description)}</div>` : ''}
             </div>
             <div class="expense-amount">¥${item.amount.toLocaleString()}</div>
           </div>`;
