@@ -442,7 +442,7 @@
       let current = new Date(startDate);
 
       for (let i = 0; i < 42; i++) {
-        const dateStr = current.toISOString().split('T')[0];
+        const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
         const isToday = current.toDateString() === today.toDateString();
         const isCurrentMonth = current.getMonth() === month;
         const hasExpense = expenses[dateStr] && expenses[dateStr].total > 0;
