@@ -1013,15 +1013,15 @@
         <div class="balance-card">
           <div class="balance-total">
             <span class="balance-label">合計収入</span>
-            <span class="balance-amount income" id="total-income">¥250,000</span>
+            <span class="balance-amount income" id="total-income">¥0</span>
           </div>
           <div class="bar-wrapper">
             <div class="bar-fill income-bar" id="income-bar" style="width:100%"></div>
-            <div class="bar-fill expense-bar" id="expense-bar" style="width:33.6%"></div>
+            <div class="bar-fill expense-bar" id="expense-bar" style="width:0%"></div>
           </div>
           <div class="bar-stats">
-            <span>支出 <strong id="total-expense-label">¥84,000</strong></span>
-            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥166,000</strong></span>
+            <span>支出 <strong id="total-expense-label">¥0</strong></span>
+            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥0</strong></span>
           </div>
         </div>
 
@@ -1029,19 +1029,19 @@
         <div class="summary-grid">
           <div class="summary-card">
             <div class="s-label">今月の収入</div>
-            <div class="s-value green" id="summary-income">¥250,000</div>
+            <div class="s-value green" id="summary-income">¥0</div>
           </div>
           <div class="summary-card">
             <div class="s-label">今月の支出</div>
-            <div class="s-value orange" id="summary-expense">¥84,000</div>
+            <div class="s-value orange" id="summary-expense">¥0</div>
           </div>
           <div class="summary-card">
             <div class="s-label">残額</div>
-            <div class="s-value" id="summary-remaining">¥166,000</div>
+            <div class="s-value" id="summary-remaining">¥0</div>
           </div>
           <div class="summary-card">
             <div class="s-label">記録件数</div>
-            <div class="s-value" id="summary-count">8件</div>
+            <div class="s-value" id="summary-count">0件</div>
           </div>
         </div>
 
@@ -1053,7 +1053,13 @@
 
         <!-- Recent Expenses -->
         <div class="recent-section">
-          <div class="section-title" style="margin-bottom:12px">📝 最近の支出</div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
+            <div class="section-title">📝 最近の支出</div>
+            <div style="display:flex; gap:16px; align-items:center">
+              <a href="transactions.html" style="font-size:14px; color:var(--text-muted); text-decoration:none; font-weight:500">履歴</a>
+              <a href="calendar.html" style="font-size:18px; text-decoration:none">🗓</a>
+            </div>
+          </div>
           <ul class="recent-list" id="recent-list"></ul>
         </div>
       </div>
@@ -1185,14 +1191,6 @@
       <button class="nav-item" onclick="showPage('debt')" data-page="debt">
         <span class="nav-icon">💰</span>
         <span>返済</span>
-      </button>
-      <button class="nav-item" onclick="location.href='transactions.html'" data-page="transactions">
-        <span class="nav-icon">📋</span>
-        <span>履歴</span>
-      </button>
-      <button class="nav-item" onclick="location.href='calendar.html'" data-page="calendar">
-        <span class="nav-icon">📅</span>
-        <span>カレンダー</span>
       </button>
     </nav>
   </div>
