@@ -1013,15 +1013,15 @@
         <div class="balance-card">
           <div class="balance-total">
             <span class="balance-label">合計収入</span>
-            <span class="balance-amount income" id="total-income">¥0</span>
+            <span class="balance-amount income" id="total-income">¥250,000</span>
           </div>
           <div class="bar-wrapper">
             <div class="bar-fill income-bar" id="income-bar" style="width:100%"></div>
-            <div class="bar-fill expense-bar" id="expense-bar" style="width:0%"></div>
+            <div class="bar-fill expense-bar" id="expense-bar" style="width:33.6%"></div>
           </div>
           <div class="bar-stats">
-            <span>支出 <strong id="total-expense-label">¥0</strong></span>
-            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥0</strong></span>
+            <span>支出 <strong id="total-expense-label">¥84,000</strong></span>
+            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥166,000</strong></span>
           </div>
         </div>
 
@@ -1029,19 +1029,19 @@
         <div class="summary-grid">
           <div class="summary-card">
             <div class="s-label">今月の収入</div>
-            <div class="s-value green" id="summary-income">¥0</div>
+            <div class="s-value green" id="summary-income">¥250,000</div>
           </div>
           <div class="summary-card">
             <div class="s-label">今月の支出</div>
-            <div class="s-value orange" id="summary-expense">¥0</div>
+            <div class="s-value orange" id="summary-expense">¥84,000</div>
           </div>
           <div class="summary-card">
             <div class="s-label">残額</div>
-            <div class="s-value" id="summary-remaining">¥0</div>
+            <div class="s-value" id="summary-remaining">¥166,000</div>
           </div>
           <div class="summary-card">
             <div class="s-label">記録件数</div>
-            <div class="s-value" id="summary-count">0件</div>
+            <div class="s-value" id="summary-count">8件</div>
           </div>
         </div>
 
@@ -1053,14 +1053,24 @@
 
         <!-- Recent Expenses -->
         <div class="recent-section">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px">
-            <div class="section-title">📝 最近の支出</div>
-            <div style="display:flex; gap:16px; align-items:center">
-              <a href="transactions.html" style="font-size:14px; color:var(--text-muted); text-decoration:none; font-weight:500">履歴</a>
-              <a href="calendar.html" style="font-size:18px; text-decoration:none">🗓</a>
-            </div>
+          <!-- タブヘッダー -->
+          <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:12px;">
+            <button id="tab-recent" onclick="switchTab('recent')" style="flex:1; padding:10px 4px; background:none; border:none; border-bottom:2px solid var(--primary); color:var(--primary); font-weight:600; font-size:13px; cursor:pointer;">📝 最近の支出</button>
+            <button id="tab-history" onclick="switchTab('history')" style="flex:1; padding:10px 4px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-secondary); font-size:13px; cursor:pointer;">📋 履歴</button>
+            <button id="tab-calendar" onclick="switchTab('calendar')" style="flex:1; padding:10px 4px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-secondary); font-size:13px; cursor:pointer;">📅 カレンダー</button>
           </div>
-          <ul class="recent-list" id="recent-list"></ul>
+          <!-- 最近の支出タブ -->
+          <div id="panel-recent">
+            <ul class="recent-list" id="recent-list"></ul>
+          </div>
+          <!-- 履歴タブ -->
+          <div id="panel-history" style="display:none; text-align:center; padding:20px 0;">
+            <button onclick="location.href='transactions.html'" style="width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer;">📋 収支履歴を見る</button>
+          </div>
+          <!-- カレンダータブ -->
+          <div id="panel-calendar" style="display:none; text-align:center; padding:20px 0;">
+            <button onclick="location.href='calendar.html'" style="width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer;">📅 カレンダーを見る</button>
+          </div>
         </div>
       </div>
 
@@ -1084,26 +1094,12 @@
           <div style="margin-bottom: 20px">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
               <h3 style="font-size: 14px; font-weight: 600">登録済み項目</h3>
-              <button onclick="toggleFixedForm()" style="background: var(--teal); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px">+ 追加</button>
+              <button onclick="openFixedModal()" style="background: var(--teal); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px">+ 追加</button>
             </div>
             <ul id="fixed-list" style="list-style: none">
               <li style="padding: 12px; background: #f5f5f5; border-radius: 8px; text-align: center; color: var(--text-muted)">項目を読み込み中...</li>
             </ul>
           </div>
-
-          <form id="fixed-form" onsubmit="saveFixed(event)" style="display: none; background: #f5f5f5; padding: 16px; border-radius: 8px; gap: 12px; flex-direction: column">
-            <input type="text" id="fixed-name" placeholder="項目名（例：給料、家賃）" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
-            <input type="number" id="fixed-amount" placeholder="金額" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
-            <select id="fixed-type" style="padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit" required>
-              <option value="">種別を選択</option>
-              <option value="income">収入</option>
-              <option value="expense">支出</option>
-            </select>
-            <div style="display: flex; gap: 8px">
-              <button type="submit" style="flex: 1; background: var(--teal); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: 600">保存</button>
-              <button type="button" onclick="toggleFixedForm()" style="flex: 1; background: var(--border); color: var(--text); border: none; padding: 12px; border-radius: 6px; cursor: pointer">キャンセル</button>
-            </div>
-          </form>
         </div>
       </div>
 
@@ -1193,6 +1189,30 @@
         <span>返済</span>
       </button>
     </nav>
+  </div>
+
+  <!-- Fixed Item Modal -->
+  <div class="modal-overlay" id="fixed-modal" onclick="closeFixedModal(event)">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-title">固定費を追加</div>
+      <form id="fixed-form" onsubmit="saveFixed(event)">
+        <input type="text" class="form-input" id="fixed-name" placeholder="項目名（例：給料、家賃）" required>
+        <div class="amount-input-wrapper">
+          <span class="amount-prefix">¥</span>
+          <input type="number" class="amount-input" id="fixed-amount" placeholder="0" min="1" inputmode="numeric" required>
+        </div>
+        <select class="styled-select" id="fixed-type" required style="width: 100%; margin-bottom: 20px">
+          <option value="">種別を選択</option>
+          <option value="income">収入</option>
+          <option value="expense">支出</option>
+        </select>
+        <div style="display: flex; gap: 8px">
+          <button type="submit" class="btn-save" style="flex: 1; margin-top: 0">保存する</button>
+          <button type="button" onclick="closeFixedModal(null)" style="flex: 1; background: var(--border); color: var(--text); border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 700">キャンセル</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Record Modal -->
@@ -1722,9 +1742,20 @@ async function loadFixedItems(user) {
   }
 }
 
+function openFixedModal() {
+  document.getElementById('fixed-modal').classList.add('open');
+  document.getElementById('fixed-name').focus();
+}
+
+function closeFixedModal(e) {
+  if (!e || e.target === document.getElementById('fixed-modal')) {
+    document.getElementById('fixed-modal').classList.remove('open');
+    document.getElementById('fixed-form').reset();
+  }
+}
+
 function toggleFixedForm() {
-  const form = document.getElementById('fixed-form');
-  form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+  openFixedModal();
 }
 
 async function saveFixed(e) {
@@ -1747,8 +1778,7 @@ async function saveFixed(e) {
       amount: amount,
       category: type
     });
-    document.getElementById('fixed-form').reset();
-    toggleFixedForm();
+    closeFixedModal(null);
     showToast('項目を追加しました ✓');
     loadFixedItems(user);
   } catch (err) {
@@ -1940,6 +1970,17 @@ async function addPayment(e) {
   } catch (err) {
     showToast('記録に失敗しました');
   }
+}
+
+// ===== Tab Switching =====
+function switchTab(tab) {
+  ['recent','history','calendar'].forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === tab ? '' : 'none';
+    const btn = document.getElementById('tab-' + t);
+    btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent';
+    btn.style.color = t === tab ? 'var(--primary)' : 'var(--text-secondary)';
+    btn.style.fontWeight = t === tab ? '600' : 'normal';
+  });
 }
 
 // ===== Start =====
