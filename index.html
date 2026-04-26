@@ -1013,15 +1013,15 @@
         <div class="balance-card">
           <div class="balance-total">
             <span class="balance-label">合計収入</span>
-            <span class="balance-amount income" id="total-income">¥250,000</span>
+            <span class="balance-amount income" id="total-income">¥0</span>
           </div>
           <div class="bar-wrapper">
-            <div class="bar-fill income-bar" id="income-bar" style="width:100%"></div>
-            <div class="bar-fill expense-bar" id="expense-bar" style="width:33.6%"></div>
+            <div class="bar-fill income-bar" id="income-bar" style="width:0%"></div>
+            <div class="bar-fill expense-bar" id="expense-bar" style="width:0%"></div>
           </div>
           <div class="bar-stats">
-            <span>支出 <strong id="total-expense-label">¥84,000</strong></span>
-            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥166,000</strong></span>
+            <span>支出 <strong id="total-expense-label">¥0</strong></span>
+            <span>残り <strong id="remaining-label" style="color:var(--teal)">¥0</strong></span>
           </div>
         </div>
 
@@ -1029,19 +1029,19 @@
         <div class="summary-grid">
           <div class="summary-card">
             <div class="s-label">今月の収入</div>
-            <div class="s-value green" id="summary-income">¥250,000</div>
+            <div class="s-value green" id="summary-income">¥0</div>
           </div>
           <div class="summary-card">
             <div class="s-label">今月の支出</div>
-            <div class="s-value orange" id="summary-expense">¥84,000</div>
+            <div class="s-value orange" id="summary-expense">¥0</div>
           </div>
           <div class="summary-card">
             <div class="s-label">残額</div>
-            <div class="s-value" id="summary-remaining">¥166,000</div>
+            <div class="s-value" id="summary-remaining">¥0</div>
           </div>
           <div class="summary-card">
             <div class="s-label">記録件数</div>
-            <div class="s-value" id="summary-count">8件</div>
+            <div class="s-value" id="summary-count">0件</div>
           </div>
         </div>
 
@@ -1537,7 +1537,8 @@ function showPage(pageId) {
 
 // ===== Dashboard Data =====
 async function loadDashboard(user) {
-  // Try to load real data from Supabase, fall back to dummy data
+  // Load real data from Supabase. Until it finishes, keep the screen at ¥0/0件.
+  // Do not render demo values here because they flash before the real data arrives.
   try {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
@@ -1577,13 +1578,12 @@ async function loadDashboard(user) {
       return;
     }
   } catch(e) {
-    // Use dummy data if DB not set up yet
+    console.warn('Dashboard load failed:', e);
   }
 
-  // Dummy data
-  const income = 250000;
-  const expense = 84000;
-  updateDashboard(income, expense, income - expense, 8);
+  // If the real data is unavailable, show a neutral empty state instead of demo data.
+  updateDashboard(0, 0, 0, 0);
+  updateRecentList([]);
 }
 
 function updateDashboard(income, expense, remaining, count) {
@@ -1601,12 +1601,15 @@ function updateDashboard(income, expense, remaining, count) {
 }
 
 function updateRecentList(expenses) {
-  if (!expenses || expenses.length === 0) return;
+  const list = document.getElementById('recent-list');
+  if (!expenses || expenses.length === 0) {
+    list.innerHTML = '<li class="recent-item"><div class="recent-info"><div class="recent-name">まだ記録がありません</div><div class="recent-date">支出を追加するとここに表示されます</div></div></li>';
+    return;
+  }
   const categoryIcons = {
     '食費': '🛒', '外食': '🍜', '交通': '🚃', '医療': '💊',
     '日用品': '🧴', '娯楽': '🎮', '衣類': '👕', 'その他': '📦'
   };
-  const list = document.getElementById('recent-list');
   list.innerHTML = expenses.map(e => {
     const icon = categoryIcons[e.category] || '📦';
     const date = e.date ? new Date(e.date + 'T00:00:00') : new Date();
