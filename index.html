@@ -1593,6 +1593,7 @@ function updateDashboard(income, expense, remaining, count) {
   document.getElementById('total-income').textContent = fmt(income);
   document.getElementById('total-expense-label').textContent = fmt(expense);
   document.getElementById('remaining-label').textContent = fmt(remaining);
+  document.getElementById('income-bar').style.width = income > 0 ? '100%' : '0%';
   document.getElementById('expense-bar').style.width = pct + '%';
   document.getElementById('summary-income').textContent = fmt(income);
   document.getElementById('summary-expense').textContent = fmt(expense);
