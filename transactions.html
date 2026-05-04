@@ -207,6 +207,30 @@
     const { createClient } = supabase;
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    // XSS対策: HTML特殊文字をエスケープ（calendar.html と同系統）
+    function escapeHtml(text) {
+      if (text === null || text === undefined) return '';
+      const s = String(text);
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return s.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // 【時差バグ対策】toISOString() はUTC基準で日付がズレることがあるため、
+    // ローカルの year/month から "YYYY-MM" を組み立てる
+    function toYearMonthLocal(d) {
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+    }
+
     // 月セレクトを初期化（直近12ヶ月 + 「すべて」）
     function initMonthSelect() {
       const sel = document.getElementById('month-select');
@@ -214,7 +238,7 @@
       const now = new Date();
       for (let i = 0; i < 12; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const val = d.toISOString().slice(0, 7); // "YYYY-MM"
+        const val = toYearMonthLocal(d); // "YYYY-MM"
         const label = `${d.getFullYear()}年${d.getMonth() + 1}月`;
         const opt = document.createElement('option');
         opt.value = val;
@@ -228,7 +252,7 @@
       const [y, m] = ym.split('-').map(Number);
       return m === 12
         ? `${y + 1}-01`
-        : `${y}-${String(m + 1).padStart(2, '0')}`;
+        : `${y}-${pad2(m + 1)}`;
     }
 
     async function loadTransactions() {
@@ -237,7 +261,20 @@
       const summaryBar = document.getElementById('summary-bar');
       list.innerHTML = '<div class="loading">読み込み中...</div>';
 
-      let query = sb.from('transactions').select('*').order('date', { ascending: false });
+      // セッション（ログイン）前提：RLSが有効なため user_id で絞り込む
+      const { data: { user }, error: userError } = await sb.auth.getUser();
+      if (userError || !user) {
+        list.innerHTML = `<div class="empty"><div class="empty-icon">🔒</div><div>ログインしてください</div></div>`;
+        summaryBar.style.display = 'none';
+        return;
+      }
+
+      let query = sb
+        .from('daily_expense')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+
       if (month) {
         query = query
           .gte('date', month + '-01')
@@ -258,9 +295,9 @@
         return;
       }
 
-      // サマリー計算
-      const totalIncome  = data.filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0);
-      const totalExpense = data.filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0);
+      // サマリー計算（現状: daily_expense は支出のみ）
+      const totalIncome  = 0;
+      const totalExpense = data.reduce((s, t) => s + (t.amount || 0), 0);
       const balance = totalIncome - totalExpense;
       document.getElementById('sum-income').textContent  = `¥${totalIncome.toLocaleString()}`;
       document.getElementById('sum-expense').textContent = `¥${totalExpense.toLocaleString()}`;
@@ -271,15 +308,17 @@
 
       // 一覧描画
       list.innerHTML = data.map(t => {
-        const isIncome = t.type === 'income';
-        const sign = isIncome ? '+' : '-';
-        const cls  = isIncome ? 'income' : 'expense';
+        // 支出のみ
+        const sign = '-';
+        const cls  = 'expense';
+        const title = (t.store || t.category || '未分類');
+        const memo = t.memo || t.payment_method || '';
         return `
           <div class="item">
             <div class="item-left">
               <span class="item-date">${t.date || ''}</span>
-              <span class="item-category">${t.category || '未分類'}</span>
-              ${t.memo ? `<span class="item-memo">${t.memo}</span>` : ''}
+              <span class="item-category">${escapeHtml(title)}</span>
+              ${memo ? `<span class="item-memo">${escapeHtml(memo)}</span>` : ''}
             </div>
             <span class="item-amount ${cls}">${sign}¥${Number(t.amount || 0).toLocaleString()}</span>
           </div>

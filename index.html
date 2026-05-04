@@ -1317,6 +1317,23 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+// 時差バグ対策: toISOString() はUTC基準で日付がズレるため、ローカル日付を組み立てる
+function toLocalDateString(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+// XSS対策: ユーザー入力をHTMLへ出す前にエスケープする
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  const s = String(text);
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+  return s.replace(/[&<>"']/g, m => map[m]);
+}
+
 // ===== Auth Redirect =====
 (async () => {
   try {
@@ -1541,8 +1558,8 @@ async function loadDashboard(user) {
   // Do not render demo values here because they flash before the real data arrives.
   try {
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).toISOString().split('T')[0];
+    const firstDay = toLocalDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+    const lastDay = toLocalDateString(new Date(now.getFullYear(), now.getMonth()+1, 0));
 
     // Fixed income
     const { data: incomeData } = await sb
@@ -1619,7 +1636,7 @@ function updateRecentList(expenses) {
       <li class="recent-item">
         <div class="recent-icon">${icon}</div>
         <div class="recent-info">
-          <div class="recent-name">${e.store || e.category || 'その他'}</div>
+          <div class="recent-name">${escapeHtml(e.store || e.category || 'その他')}</div>
           <div class="recent-date">${dateStr}</div>
         </div>
         <div class="recent-amount">−¥${(e.amount||0).toLocaleString('ja-JP')}</div>
@@ -1661,7 +1678,7 @@ async function saveRecord(e) {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString(new Date());
     const { error } = await sb.from('daily_expense').insert({
       user_id: user.id,
       date: today,
@@ -1961,7 +1978,7 @@ async function addPayment(e) {
 
   try {
     // Add payment record
-    await sb.from('debt_payments').insert({ debt_id: debtId, amount, date: new Date().toISOString().split('T')[0] });
+    await sb.from('debt_payments').insert({ debt_id: debtId, amount, date: toLocalDateString(new Date()) });
 
     // Update debt remaining
     const { data: debt } = await sb.from('debts').select('remaining').eq('id', debtId).single();
