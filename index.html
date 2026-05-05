@@ -560,6 +560,51 @@
       border: 1px solid var(--border);
     }
 
+    .recent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .recent-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .recent-shortcuts {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .shortcut-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--teal-dark);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .shortcut-btn:active {
+      transform: scale(0.97);
+      background: var(--teal-light);
+    }
+
     .recent-list { list-style: none; }
 
     .recent-item {
@@ -1053,24 +1098,14 @@
 
         <!-- Recent Expenses -->
         <div class="recent-section">
-          <!-- タブヘッダー -->
-          <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:12px;">
-            <button id="tab-recent" onclick="switchTab('recent')" style="flex:1; padding:10px 4px; background:none; border:none; border-bottom:2px solid var(--primary); color:var(--primary); font-weight:600; font-size:13px; cursor:pointer;">📝 最近の支出</button>
-            <button id="tab-history" onclick="switchTab('history')" style="flex:1; padding:10px 4px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-secondary); font-size:13px; cursor:pointer;">📋 履歴</button>
-            <button id="tab-calendar" onclick="switchTab('calendar')" style="flex:1; padding:10px 4px; background:none; border:none; border-bottom:2px solid transparent; color:var(--text-secondary); font-size:13px; cursor:pointer;">📅 カレンダー</button>
+          <div class="recent-header">
+            <div class="recent-title">📝 最近の支出</div>
+            <div class="recent-shortcuts" aria-label="履歴とカレンダーへのショートカット">
+              <a class="shortcut-btn" href="transactions.html" aria-label="収支履歴を開く">📋 履歴</a>
+              <a class="shortcut-btn" href="calendar.html" aria-label="カレンダーを開く">📅 カレンダー</a>
+            </div>
           </div>
-          <!-- 最近の支出タブ -->
-          <div id="panel-recent">
-            <ul class="recent-list" id="recent-list"></ul>
-          </div>
-          <!-- 履歴タブ -->
-          <div id="panel-history" style="display:none; text-align:center; padding:20px 0;">
-            <button onclick="location.href='transactions.html'" style="width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer;">📋 収支履歴を見る</button>
-          </div>
-          <!-- カレンダータブ -->
-          <div id="panel-calendar" style="display:none; text-align:center; padding:20px 0;">
-            <button onclick="location.href='calendar.html'" style="width:100%; padding:14px; background:var(--primary); color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer;">📅 カレンダーを見る</button>
-          </div>
+          <ul class="recent-list" id="recent-list"></ul>
         </div>
       </div>
 
@@ -1993,16 +2028,6 @@ async function addPayment(e) {
   }
 }
 
-// ===== Tab Switching =====
-function switchTab(tab) {
-  ['recent','history','calendar'].forEach(t => {
-    document.getElementById('panel-' + t).style.display = t === tab ? '' : 'none';
-    const btn = document.getElementById('tab-' + t);
-    btn.style.borderBottomColor = t === tab ? 'var(--primary)' : 'transparent';
-    btn.style.color = t === tab ? 'var(--primary)' : 'var(--text-secondary)';
-    btn.style.fontWeight = t === tab ? '600' : 'normal';
-  });
-}
 
 // ===== Start =====
 init();
