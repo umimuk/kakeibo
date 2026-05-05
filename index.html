@@ -904,6 +904,42 @@
       font-size: 12px;
     }
 
+    .settings-item.is-disabled {
+      cursor: default;
+      background: #f8fafc;
+    }
+
+    .settings-item.is-disabled:active {
+      background: #f8fafc;
+    }
+
+    .settings-item-badge {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      background: #eef2ff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .settings-note {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .settings-note strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
     .settings-user-info {
       padding: 20px 16px;
       display: flex;
@@ -1300,36 +1336,41 @@
         </div>
       </div>
 
+      <div class="settings-note">
+        <strong>一部の設定は準備中です</strong>
+        OCR取り込みやAIまわりの設定は、準備ができしだい使えるようにします。今はこの画面から変更できません。
+      </div>
+
       <div class="settings-section">
-        <div class="settings-section-title">アプリ設定</div>
-        <div class="settings-item">
-          <span class="settings-item-icon">🏷️</span>
-          <span class="settings-item-label">カテゴリ編集</span>
-          <span class="settings-item-arrow">›</span>
+        <div class="settings-section-title">準備中の機能</div>
+        <div class="settings-item is-disabled">
+          <span class="settings-item-icon">📷</span>
+          <span class="settings-item-label">OCR取り込み設定</span>
+          <span class="settings-item-badge">準備中</span>
         </div>
-        <div class="settings-item">
-          <span class="settings-item-icon">💳</span>
-          <span class="settings-item-label">支払い方法編集</span>
-          <span class="settings-item-arrow">›</span>
+        <div class="settings-item is-disabled">
+          <span class="settings-item-icon">🤖</span>
+          <span class="settings-item-label">AIカテゴリ補助</span>
+          <span class="settings-item-badge">準備中</span>
         </div>
-        <div class="settings-item">
-          <span class="settings-item-icon">🎨</span>
-          <span class="settings-item-label">テーマカラー</span>
-          <span class="settings-item-arrow">›</span>
+        <div class="settings-item is-disabled">
+          <span class="settings-item-icon">📝</span>
+          <span class="settings-item-label">AI振り返りレポート</span>
+          <span class="settings-item-badge">準備中</span>
         </div>
-        <div class="settings-item">
+        <div class="settings-item is-disabled">
           <span class="settings-item-icon">🔢</span>
           <span class="settings-item-label">リボ計算</span>
-          <span class="settings-item-arrow">›</span>
+          <span class="settings-item-badge">準備中</span>
         </div>
       </div>
 
       <div class="settings-section">
         <div class="settings-section-title">アカウント</div>
-        <div class="settings-item">
+        <div class="settings-item is-disabled">
           <span class="settings-item-icon">👤</span>
-          <span class="settings-item-label">プロフィール</span>
-          <span class="settings-item-arrow">›</span>
+          <span class="settings-item-label">プロフィール編集</span>
+          <span class="settings-item-badge">後で対応</span>
         </div>
       </div>
 
