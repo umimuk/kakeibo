@@ -29,6 +29,39 @@
       --radius: 12px;
     }
 
+    html[data-theme="blue"] {
+      --teal: #3b82f6;
+      --teal-dark: #2563eb;
+      --teal-light: #dbeafe;
+      --bg: #eff6ff;
+      --income: #3b82f6;
+    }
+
+    html[data-theme="orange"] {
+      --teal: #f97316;
+      --teal-dark: #ea580c;
+      --teal-light: #ffedd5;
+      --bg: #fff7ed;
+      --income: #f97316;
+      --expense: #ef4444;
+    }
+
+    html[data-theme="pink"] {
+      --teal: #ec4899;
+      --teal-dark: #db2777;
+      --teal-light: #fce7f3;
+      --bg: #fdf2f8;
+      --income: #ec4899;
+    }
+
+    html[data-theme="purple"] {
+      --teal: #8b5cf6;
+      --teal-dark: #7c3aed;
+      --teal-light: #ede9fe;
+      --bg: #f5f3ff;
+      --income: #8b5cf6;
+    }
+
     html, body {
       height: 100%;
       font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans JP', 'Segoe UI', sans-serif;
@@ -940,6 +973,105 @@
       margin-bottom: 4px;
     }
 
+
+    .settings-detail {
+      display: none;
+      padding: 16px;
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+    }
+
+    .settings-detail.open { display: block; }
+
+    .settings-inline-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .settings-inline-form input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .settings-small-btn {
+      border: none;
+      border-radius: 10px;
+      background: var(--teal);
+      color: white;
+      font-weight: 700;
+      padding: 0 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .settings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .settings-list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .settings-delete-btn {
+      border: none;
+      background: #fef2f2;
+      color: var(--danger);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .theme-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .theme-choice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .theme-choice.active {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(20,184,166,0.12);
+    }
+
+    .theme-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .settings-help {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
     .settings-user-info {
       padding: 20px 16px;
       display: flex;
@@ -1337,8 +1469,8 @@
       </div>
 
       <div class="settings-note">
-        <strong>設定メニューを整理しました</strong>
-        OCR取り込み設定は残しつつ、カテゴリ・支払い方法・テーマカラーの設定をこの画面から選べる形にしています。
+        <strong>設定できます</strong>
+        カテゴリ・支払い方法・テーマカラーはこの画面から変更できます。OCR取り込み設定は準備中です。
       </div>
 
       <div class="settings-section">
@@ -1348,20 +1480,40 @@
           <span class="settings-item-label">OCR取り込み設定</span>
           <span class="settings-item-badge">準備中</span>
         </div>
-        <div class="settings-item is-disabled">
+        <div class="settings-item" onclick="toggleSettingsDetail('category-settings')">
           <span class="settings-item-icon">🏷️</span>
-          <span class="settings-item-label">カテゴリ設定（手動）</span>
-          <span class="settings-item-badge">準備中</span>
+          <span class="settings-item-label">カテゴリ設定</span>
+          <span class="settings-item-arrow">›</span>
         </div>
-        <div class="settings-item is-disabled">
+        <div class="settings-detail" id="category-settings">
+          <form class="settings-inline-form" onsubmit="addCategorySetting(event)">
+            <input type="text" class="form-input" id="new-category-name" placeholder="例：美容・カフェ" maxlength="20">
+            <button type="submit" class="settings-small-btn">追加</button>
+          </form>
+          <div class="settings-list" id="category-settings-list"></div>
+          <p class="settings-help">ここで追加したカテゴリは、支出記録のカテゴリ選択に反映されます。</p>
+        </div>
+        <div class="settings-item" onclick="toggleSettingsDetail('payment-settings')">
           <span class="settings-item-icon">💳</span>
-          <span class="settings-item-label">支払い方法設定（手動）</span>
-          <span class="settings-item-badge">準備中</span>
+          <span class="settings-item-label">支払い方法設定</span>
+          <span class="settings-item-arrow">›</span>
         </div>
-        <div class="settings-item is-disabled">
+        <div class="settings-detail" id="payment-settings">
+          <form class="settings-inline-form" onsubmit="addPaymentMethodSetting(event)">
+            <input type="text" class="form-input" id="new-payment-method-name" placeholder="例：楽天カード・Suica" maxlength="24">
+            <button type="submit" class="settings-small-btn">追加</button>
+          </form>
+          <div class="settings-list" id="payment-settings-list"></div>
+          <p class="settings-help">ここで追加した支払い方法は、支出記録の支払い方法選択に反映されます。</p>
+        </div>
+        <div class="settings-item" onclick="toggleSettingsDetail('theme-settings')">
           <span class="settings-item-icon">🎨</span>
-          <span class="settings-item-label">テーマカラー設定（複数から選択可）</span>
-          <span class="settings-item-badge">準備中</span>
+          <span class="settings-item-label">テーマカラー設定</span>
+          <span class="settings-item-arrow">›</span>
+        </div>
+        <div class="settings-detail" id="theme-settings">
+          <div class="theme-options" id="theme-options"></div>
+          <p class="settings-help">選んだ色はこの端末に保存し、ログイン中はプロフィールにも保存します。</p>
         </div>
       </div>
 
@@ -1392,6 +1544,18 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+const DEFAULT_CATEGORIES = ['食費', '外食', '交通', '医療', '日用品', '娯楽', '衣類', 'その他'];
+const DEFAULT_PAYMENT_METHODS = ['現金', 'PayPay'];
+const THEME_COLORS = [
+  { id: 'teal', label: 'ミント', color: '#14b8a6' },
+  { id: 'blue', label: 'ブルー', color: '#3b82f6' },
+  { id: 'orange', label: 'オレンジ', color: '#f97316' },
+  { id: 'pink', label: 'ピンク', color: '#ec4899' },
+  { id: 'purple', label: 'パープル', color: '#8b5cf6' },
+];
+let cachedCards = [];
 
 function pad2(n) {
   return String(n).padStart(2, '0');
@@ -1470,6 +1634,7 @@ function showMain(user) {
   document.getElementById('month-label').textContent =
     `${now.getFullYear()}年${now.getMonth()+1}月`;
   // Load dashboard data
+  loadUserSettings(user);
   loadDashboard(user);
   loadFixedItems(user);
   loadCards(user);
@@ -1793,6 +1958,215 @@ function closeSettings() {
   document.getElementById('settings-panel').style.display = 'none';
 }
 
+
+// ===== User Settings =====
+function settingsKey(user, key) {
+  return `kakeibo:${user?.id || 'guest'}:${key}`;
+}
+
+function getStoredList(user, key, defaults) {
+  try {
+    const raw = localStorage.getItem(settingsKey(user, key));
+    const parsed = raw ? JSON.parse(raw) : [];
+    const merged = [...defaults, ...(Array.isArray(parsed) ? parsed : [])];
+    return [...new Set(merged.map(v => String(v).trim()).filter(Boolean))];
+  } catch (err) {
+    return [...defaults];
+  }
+}
+
+function saveCustomList(user, key, defaults, list) {
+  const customOnly = list.filter(item => !defaults.includes(item));
+  localStorage.setItem(settingsKey(user, key), JSON.stringify(customOnly));
+}
+
+function escapeAttr(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escapeJsArg(value) {
+  return escapeAttr(JSON.stringify(String(value ?? '')));
+}
+
+async function getCurrentUser() {
+  const { data: { user } } = await sb.auth.getUser();
+  return user;
+}
+
+async function loadUserSettings(user) {
+  renderCategorySettings(user);
+  renderPaymentSettings(user);
+  updateRecordCategoryOptions(user);
+  updateRecordPaymentOptions(user, cachedCards);
+  renderThemeOptions(localStorage.getItem(settingsKey(user, 'theme')) || 'teal');
+  await loadThemeSetting(user);
+}
+
+function toggleSettingsDetail(id) {
+  document.querySelectorAll('.settings-detail').forEach(detail => {
+    detail.classList.toggle('open', detail.id === id && !detail.classList.contains('open'));
+  });
+}
+
+function updateRecordCategoryOptions(user) {
+  const select = document.getElementById('record-category');
+  if (!select) return;
+  const selected = select.value;
+  const categories = getStoredList(user, 'categories', DEFAULT_CATEGORIES);
+  const icons = {
+    '食費': '🛒', '外食': '🍜', '交通': '🚃', '医療': '💊',
+    '日用品': '🧴', '娯楽': '🎮', '衣類': '👕', 'その他': '📦'
+  };
+  select.innerHTML = '<option value="">カテゴリ</option>' + categories.map(category => {
+    const icon = icons[category] || '🏷️';
+    return `<option value="${escapeAttr(category)}">${icon} ${escapeHtml(category)}</option>`;
+  }).join('');
+  if (categories.includes(selected)) select.value = selected;
+}
+
+function updateRecordPaymentOptions(user, cards = []) {
+  const select = document.getElementById('record-payment');
+  if (!select) return;
+  const selected = select.value;
+  const methods = getStoredList(user, 'paymentMethods', DEFAULT_PAYMENT_METHODS);
+  const cardNames = (cards || []).map(card => card.card_name).filter(Boolean);
+  const allMethods = [...new Set([...methods, ...cardNames])];
+  select.innerHTML = '<option value="">支払方法</option>' + allMethods.map(method => (
+    `<option value="${escapeAttr(method)}">${escapeHtml(method)}</option>`
+  )).join('');
+  if (allMethods.includes(selected)) select.value = selected;
+}
+
+function renderCategorySettings(user) {
+  const list = document.getElementById('category-settings-list');
+  if (!list) return;
+  const categories = getStoredList(user, 'categories', DEFAULT_CATEGORIES);
+  list.innerHTML = categories.map(category => {
+    const isDefault = DEFAULT_CATEGORIES.includes(category);
+    return `<div class="settings-list-row"><span>${escapeHtml(category)}</span>${isDefault ? '<span class="settings-item-badge">標準</span>' : `<button class="settings-delete-btn" onclick="deleteCategorySetting(${escapeJsArg(category)})">削除</button>`}</div>`;
+  }).join('');
+}
+
+async function addCategorySetting(event) {
+  event.preventDefault();
+  const user = await getCurrentUser();
+  const input = document.getElementById('new-category-name');
+  const name = input.value.trim();
+  if (!name) {
+    showToast('カテゴリ名を入力してください');
+    return;
+  }
+  const categories = getStoredList(user, 'categories', DEFAULT_CATEGORIES);
+  if (categories.includes(name)) {
+    showToast('同じカテゴリがあります');
+    return;
+  }
+  categories.push(name);
+  saveCustomList(user, 'categories', DEFAULT_CATEGORIES, categories);
+  input.value = '';
+  renderCategorySettings(user);
+  updateRecordCategoryOptions(user);
+  showToast('カテゴリを追加しました ✓');
+}
+
+async function deleteCategorySetting(name) {
+  const user = await getCurrentUser();
+  const categories = getStoredList(user, 'categories', DEFAULT_CATEGORIES).filter(category => category !== name);
+  saveCustomList(user, 'categories', DEFAULT_CATEGORIES, categories);
+  renderCategorySettings(user);
+  updateRecordCategoryOptions(user);
+  showToast('カテゴリを削除しました ✓');
+}
+
+function renderPaymentSettings(user) {
+  const list = document.getElementById('payment-settings-list');
+  if (!list) return;
+  const methods = getStoredList(user, 'paymentMethods', DEFAULT_PAYMENT_METHODS);
+  list.innerHTML = methods.map(method => {
+    const isDefault = DEFAULT_PAYMENT_METHODS.includes(method);
+    return `<div class="settings-list-row"><span>${escapeHtml(method)}</span>${isDefault ? '<span class="settings-item-badge">標準</span>' : `<button class="settings-delete-btn" onclick="deletePaymentMethodSetting(${escapeJsArg(method)})">削除</button>`}</div>`;
+  }).join('');
+}
+
+async function addPaymentMethodSetting(event) {
+  event.preventDefault();
+  const user = await getCurrentUser();
+  const input = document.getElementById('new-payment-method-name');
+  const name = input.value.trim();
+  if (!name) {
+    showToast('支払い方法名を入力してください');
+    return;
+  }
+  const methods = getStoredList(user, 'paymentMethods', DEFAULT_PAYMENT_METHODS);
+  if (methods.includes(name)) {
+    showToast('同じ支払い方法があります');
+    return;
+  }
+  methods.push(name);
+  saveCustomList(user, 'paymentMethods', DEFAULT_PAYMENT_METHODS, methods);
+  input.value = '';
+  renderPaymentSettings(user);
+  updateRecordPaymentOptions(user, cachedCards);
+  showToast('支払い方法を追加しました ✓');
+}
+
+async function deletePaymentMethodSetting(name) {
+  const user = await getCurrentUser();
+  const methods = getStoredList(user, 'paymentMethods', DEFAULT_PAYMENT_METHODS).filter(method => method !== name);
+  saveCustomList(user, 'paymentMethods', DEFAULT_PAYMENT_METHODS, methods);
+  renderPaymentSettings(user);
+  updateRecordPaymentOptions(user, cachedCards);
+  showToast('支払い方法を削除しました ✓');
+}
+
+function applyTheme(themeId) {
+  const safeTheme = THEME_COLORS.some(theme => theme.id === themeId) ? themeId : 'teal';
+  document.documentElement.dataset.theme = safeTheme;
+  renderThemeOptions(safeTheme);
+}
+
+function renderThemeOptions(activeTheme) {
+  const container = document.getElementById('theme-options');
+  if (!container) return;
+  container.innerHTML = THEME_COLORS.map(theme => `
+    <button type="button" class="theme-choice ${theme.id === activeTheme ? 'active' : ''}" onclick="saveThemeSetting('${theme.id}')">
+      <span class="theme-dot" style="background:${theme.color}"></span>
+      <span>${theme.label}</span>
+    </button>
+  `).join('');
+}
+
+async function loadThemeSetting(user) {
+  const localTheme = localStorage.getItem(settingsKey(user, 'theme')) || 'teal';
+  applyTheme(localTheme);
+  try {
+    const { data, error } = await sb.from('user_profiles').select('theme_color').eq('id', user.id).single();
+    if (!error && data?.theme_color) {
+      localStorage.setItem(settingsKey(user, 'theme'), data.theme_color);
+      applyTheme(data.theme_color);
+    }
+  } catch (err) {
+    applyTheme(localTheme);
+  }
+}
+
+async function saveThemeSetting(themeId) {
+  const user = await getCurrentUser();
+  applyTheme(themeId);
+  localStorage.setItem(settingsKey(user, 'theme'), themeId);
+  try {
+    const { error } = await sb.from('user_profiles').upsert({ id: user.id, theme_color: themeId });
+    if (error) throw error;
+    showToast('テーマカラーを変更しました ✓');
+  } catch (err) {
+    showToast('テーマカラーを変更しました（端末に保存）');
+  }
+}
+
 // ===== Toast =====
 function showToast(msg, duration = 2500) {
   const toast = document.getElementById('toast');
@@ -1903,12 +2277,9 @@ async function loadCards(user) {
     const { data: cards, error } = await sb.from('credit_cards').select('*').eq('user_id', user.id);
     if (error) throw error;
 
-    // 支払い方法セレクトを更新（現金・PayPay固定 + 登録済みカード）
-    const paySelect = document.getElementById('record-payment');
-    if (paySelect) {
-      paySelect.innerHTML = '<option value="">支払方法</option><option value="現金">現金</option><option value="PayPay">PayPay</option>'
-        + (cards || []).map(card => `<option value="${card.card_name}">${card.card_name}</option>`).join('');
-    }
+    // 支払い方法セレクトを更新（標準 + 設定画面で追加した方法 + 登録済みカード）
+    cachedCards = cards || [];
+    updateRecordPaymentOptions(user, cachedCards);
 
     const list = document.getElementById('card-list');
     list.innerHTML = cards.map(card => {
